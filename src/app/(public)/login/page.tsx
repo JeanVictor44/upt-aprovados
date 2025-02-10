@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/app/(public)/login/comopnents/login-form";
 import Image from "next/image";
 
 export default function LoginPage() {
@@ -11,7 +11,6 @@ export default function LoginPage() {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
             <Image className="mx-auto mb-8" alt="Logo" width={180} height={150} src="/logo-uneb.svg" />
-
             <LoginForm />
           </div>
         </div>
