@@ -6,34 +6,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 export default function PrivateLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const {replace} = useRouter()
-  const supabase = createClient()
-  
   /* 
     async function handleLogout() {
       await supabase.auth.signOut()
       replace('/login')
     }
-  */
-  useEffect(() => {
-    async function redirectIfNotLoggedIn () {
-      const { data: {user}} = await supabase.auth.getUser();
-      console.log(user)
-      if(!user) {
-        replace('/login')
-      }
-    }
-    redirectIfNotLoggedIn()
-  },[])
-  
+  */  
   return(
     <SidebarProvider>
       <AppSidebar />
