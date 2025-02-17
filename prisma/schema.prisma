@@ -1,0 +1,133 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Polo {
+  id        Int        @id @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  extensoes Extensao[]
+  alunosAprovado AlunoAprovado[]
+
+  @@map("polo") 
+}
+
+model Extensao {
+  id        Int      @id @default(autoincrement())
+  name      String
+  poloId    Int      @map("polo_id") 
+  polo      Polo     @relation(fields: [poloId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alunosAprovados AlunoAprovado[]
+
+  @@map("extensao") 
+}
+
+model AreaConhecimento {
+  id        Int      @id @default(autoincrement())
+  name      String
+  cursos Curso[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("area_conhecimento") 
+}
+
+model TipoCurso {
+  id        Int      @id @default(autoincrement())
+  name      String
+  cursos Curso[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("tipo_curso") 
+}
+
+model TipoSelecao {
+  id        Int      @id @default(autoincrement())
+  name      String
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alunosAprovados AlunoAprovado[]
+
+  @@map("tipo_selecao") 
+}
+
+model Curso {
+  id        Int      @id @default(autoincrement())
+  name      String
+
+  tipoCursoId Int   @map("tipo_curso_id")
+  tipoCurso TipoCurso @relation(fields: [tipoCursoId], references: [id])
+  
+  areaConhecimentoId Int @map("area_conhecimento_id")  
+  areaConhecimento AreaConhecimento @relation(fields: [areaConhecimentoId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alunosAprovados AlunoAprovado[]
+
+  @@map("curso") 
+}
+
+model Instituicao {
+  id                    Int         @id @default(autoincrement())
+  codigo_ies            String
+  name                  String
+  uf                    String
+  municipio             String
+  codigo_municipio_ibge String
+  sigla                 String? 
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  alunosAprovados       AlunoAprovado[]
+
+  @@map("instituicao") 
+}
+
+model AlunoAprovado {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String? 
+  year      String?
+  placing   Int?      
+  
+  institutionId Int   @map("institution_id")
+  institution   Instituicao @relation(fields: [institutionId], references: [id])
+  institutionLocation String?
+
+  extensaoId Int      @map("extensao_id")
+  extensao   Extensao @relation(fields: [extensaoId], references: [id])
+
+  poloId     Int      @map("polo_id")
+  polo       Polo     @relation(fields: [poloId], references: [id])
+  
+  cursoId   Int      @map("curso_id")
+  curso     Curso    @relation(fields: [cursoId], references: [id])
+  
+  tipoSelecaoId Int   @map("tipo_selecao_id")
+  tipoSelecao TipoSelecao @relation(fields: [tipoSelecaoId], references: [id])
+
+  nomeGestor String @map("nome_gestor")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("aprovado") 
+}
