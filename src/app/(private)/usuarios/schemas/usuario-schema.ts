@@ -14,8 +14,6 @@ export const UsuarioSchema = z.object({
         message: 'O e-mail é obrigatório',
     }).trim().min(1, {
         message: 'O e-mail é obrigatório',
-    }).email({
-        message: 'O e-mail é inválido',
     }),
     poloId: z.string({
         message: 'O polo é obrigatório'
