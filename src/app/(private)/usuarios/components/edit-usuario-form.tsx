@@ -5,10 +5,7 @@ import { MySelectField } from "@/components/ui/my-select-field";
 import { MyTextField } from "@/components/ui/my-text-field";
 import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CreateGestor } from "../types/create-gestor";
-import { createGestorAction } from "../actions/create-gestor-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateGestorSchema } from "../schemas/create-gestor-schema";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ButtonLoading } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
@@ -17,41 +14,53 @@ import { Form } from "@/components/ui/form";
 import { useFormFeedback } from "@/hooks/use-form-feedback";
 import { toast } from "@/hooks/use-toast";
 import { Polo } from "@/types/polo";
+import { MyCheckbox } from "@/components/ui/my-checkbox";
+import { Usuario } from "../types/usuario";
+import { EditUsuario } from "../types/edit-usuario";
+import { EditUsuarioSchema } from "../schemas/edit-usuario-schema";
+import { editUsuarioAction } from "../actions/edit-usuario-action";
 
 interface Props {
   onSave: () => void;
   polos: Polo[];
+  selectedUsuario: Usuario | null;
 }
 
-export default function CreateGestorForm({ onSave, polos }: Props) {
-  const form = useForm<CreateGestor>({
-    resolver: zodResolver(CreateGestorSchema),
+export default function EditUsuarioForm({
+  onSave,
+  polos,
+  selectedUsuario,
+}: Props) {
+  const form = useForm<EditUsuario>({
+    resolver: zodResolver(EditUsuarioSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: selectedUsuario?.name || "",
+      email: selectedUsuario?.email || "",
       password: "",
-      poloId: "",
+      poloId: selectedUsuario?.polo.id.toString() || "",
+      isAdmin: selectedUsuario?.is_admin || false,
+      id: selectedUsuario?.id || "",
+      isActive: selectedUsuario?.is_active,
     },
   });
 
   function onSuccess() {
     onSave();
     toast({
-      title: "Sucesso!",
-      description: "Gestor cadastrado com sucesso!",
+      description: "Usuário editado com sucesso!",
       variant: "success",
     });
     form.reset();
   }
 
-  const [state, createGestorFormAction, pending] = useActionState(
-    createGestorAction,
-    createInitialState<CreateGestor>()
+  const [state, editUsuarioFormAction, pending] = useActionState(
+    editUsuarioAction,
+    createInitialState<EditUsuario>()
   );
   const [submitted, setSubmitted] = useState(false);
   useFormFeedback(state, submitted, onSuccess);
 
-  function onSubmit(data: CreateGestor) {
+  function onSubmit(data: EditUsuario) {
     setSubmitted(true);
     const formData = new FormData();
 
@@ -59,9 +68,12 @@ export default function CreateGestorForm({ onSave, polos }: Props) {
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("poloId", data.poloId);
+    formData.append("isAdmin", data.isAdmin.toString());
+    formData.append("isActive", data.isActive.toString());
+    formData.append("id", data.id.toString());
 
     startTransition(async () => {
-      createGestorFormAction(formData);
+      editUsuarioFormAction(formData);
     });
   }
 
@@ -70,6 +82,15 @@ export default function CreateGestorForm({ onSave, polos }: Props) {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
           <MyTextField control={form.control} name="name" placeholder="Nome" />
+          <MySelectField
+            control={form.control}
+            name="poloId"
+            placeholder="Selecione o polo"
+            options={polos.map(({ id, name }) => ({
+              label: name,
+              value: id.toString(),
+            }))}
+          />
           <MyTextField
             control={form.control}
             type="email"
@@ -81,14 +102,17 @@ export default function CreateGestorForm({ onSave, polos }: Props) {
             name="password"
             placeholder="Senha"
           />
-          <MySelectField
+          <MyCheckbox
             control={form.control}
-            name="poloId"
-            placeholder="Selecione o polo"
-            options={polos.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
+            name="isAdmin"
+            label="Administrador"
+            formDescription="Marque essa opção para dar permissão de administrador ao usuário."
+          />
+          <MyCheckbox
+            control={form.control}
+            name="isActive"
+            label="Usuário Ativo"
+            formDescription="Marque essa opção para ativar o usuário"
           />
         </div>
         <DialogFooter className="mt-4">

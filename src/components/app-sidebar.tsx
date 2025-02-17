@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,22 +12,26 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect,  useState } from "react";
 
 const data = {
   navMain: [
     {
       title: "Gerenciamento",
-      url: "/gestores",
+      url: "/usuarios",
+      justAdmin: true,
       items: [
         {
-          title: "Gestores",
-          url: "/gestores",
+          title: "Usuários",
+          url: "/usuarios",
         },
       ],
     },
     {
       title: "Alunos",
       url: '/aprovados',
+      justAdmin: false,
       items: [
         {
           title: "Aprovados",
@@ -38,8 +41,19 @@ const data = {
     },
   ],
 };
-
+ 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const supabase = createClient();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    (async( )=> {
+      const {data: {user}} = await supabase.auth.getUser()
+      
+      setIsAdmin(user?.user_metadata.is_admin)
+    })();
+  },[])
+
   return (
     <Sidebar {...props}>
       <SidebarHeader className="mb-2">
@@ -62,7 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {data.navMain.map((item) => (
+            {data.navMain.filter(({justAdmin}) => justAdmin ? isAdmin : true).map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
                   <a href={item.url} className="font-medium">

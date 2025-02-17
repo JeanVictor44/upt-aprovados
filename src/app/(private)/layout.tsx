@@ -25,6 +25,7 @@ export default function PrivateLayout({
   useEffect(() => {
     async function redirectIfNotLoggedIn () {
       const { data: {user}} = await supabase.auth.getUser();
+      console.log(user)
       if(!user) {
         replace('/login')
       }

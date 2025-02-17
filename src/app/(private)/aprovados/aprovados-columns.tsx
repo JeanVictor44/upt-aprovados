@@ -4,8 +4,14 @@ import { Pencil, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Aprovado } from "./types/aprovado";
+import { MyAlertDialog } from "@/components/ui/my-alert-dialog";
 
-export const aprovadosColumns: () => ColumnDef<Aprovado>[] = () => [
+interface Props {
+  onEdit: (usuario:Aprovado) => void;
+  deleteAprovado: (id: number) => void;
+}
+
+export const aprovadosColumns: ({}: Props) => ColumnDef<Aprovado>[] = ({onEdit, deleteAprovado}) => [
   {
     accessorKey: "year",
     header: ({ column }) => (
@@ -85,6 +91,14 @@ export const aprovadosColumns: () => ColumnDef<Aprovado>[] = () => [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Instituição" />
     ),
+    cell(props) {
+      const { row } = props;
+      return (
+        <span>
+          {row.original.institution.name}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "placing",
@@ -113,14 +127,16 @@ export const aprovadosColumns: () => ColumnDef<Aprovado>[] = () => [
             variant="outline"
             size="icon"
             onClick={() => {
-              console.log("editar", row.original);
+              onEdit(row.original);
             }}
           >
             <Pencil size={18} />
           </Button>
-          <Button variant="outline" size="icon">
-            <Trash size={18} />
-          </Button>
+          <MyAlertDialog title='Deletar Aprovado' description='Tem certeza que deseja deletar este aprovado?' onConfirm={() => deleteAprovado(row.original.id)}>
+            <Button variant="outline" size="icon">
+              <Trash size={18} />
+            </Button>
+          </MyAlertDialog>
         </div>
       );
     },

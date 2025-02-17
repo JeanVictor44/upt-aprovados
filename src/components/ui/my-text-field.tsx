@@ -20,6 +20,8 @@ interface MyTextFieldProps<ControlType extends FieldValues> {
   className?: string;
   maxLength?: number;
   type?: HTMLInputTypeAttribute;
+  mask?: (value: string) => string;
+  disabled?: boolean;
 }
 
 export function MyTextField<ControlType extends FieldValues>({
@@ -30,6 +32,8 @@ export function MyTextField<ControlType extends FieldValues>({
   className,
   maxLength,
   type,
+  mask,
+  disabled,
 }: MyTextFieldProps<ControlType>) {
   return (
     <FormField
@@ -42,9 +46,13 @@ export function MyTextField<ControlType extends FieldValues>({
             <Input
             className="w-full m-0"
               {...field}
+              onChange={(e) => {
+                field.onChange(mask ? mask(e.target.value) : e.target.value);
+              }}
               type={type || "text"}
               placeholder={placeholder}
               maxLength={maxLength}
+              disabled={disabled}
             />
           </FormControl>
           <FormMessage />

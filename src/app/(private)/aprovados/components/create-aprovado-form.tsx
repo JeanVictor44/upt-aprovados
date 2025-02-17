@@ -18,22 +18,43 @@ import { CreateAprovado } from "../types/create-aprovado";
 import { createAprovadoAction } from "../actions/create-aprovado-action";
 import { Domain } from "@/types/domain";
 import { MyCombobox } from "@/components/ui/my-combobox";
+import { InstituicaoEnsino } from "@/types/instituicao";
+import { useDebouncedCallback } from "use-debounce";
 
 interface Props {
   onSave: () => void;
   polos: Polo[];
 }
 
+function isValidValue(value: unknown): value is string {
+  return value !== null && value !== undefined && value !== "" && value !== "null";
+}
+
 export default function CreateAprovadoForm({ onSave, polos }: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
   const [cursos, setCursos] = useState<Domain[]>([]);
   const [tiposSelecao, setTiposSelecao] = useState<Domain[]>([]);
-
+  const [instituicoes, setInstituicoes] = useState<InstituicaoEnsino[]>([]);
+  const [instituicaoQuery, setInstituicaoQuery] = useState(
+    new URLSearchParams()
+  );
+  const [isExtensaoDisabled, setIsExtensaoDisabled] = useState(false);
   const form = useForm<CreateAprovado>({
     resolver: zodResolver(CreateAprovadoSchema),
   });
-
   const poloId = form.watch("poloId");
+
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(instituicaoQuery);
+
+    if (term) {
+      params.set("query", term);
+    } else {
+      params.delete("query");
+    }
+    setInstituicaoQuery(params);
+  }, 500);
+
 
   function onSuccess() {
     onSave();
@@ -59,7 +80,7 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
     if (data.phone) formData.append("phone", data.phone);
     formData.append("extensaoId", data.extensaoId);
     formData.append("institutionLocation", data.institutionLocation);
-    formData.append("institution", data.institution);
+    formData.append("institutionId", data.institutionId);
     formData.append("courseId", data.courseId);
     formData.append("placing", data.placing);
     formData.append("selectionTypeId", data.selectionTypeId);
@@ -70,36 +91,53 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
       createAprovadoFormAction(formData);
     });
   }
+  const fetchExtensoes = async () => {
+    if (!poloId) return;
+
+    const response = await fetch(`/polos/extensoes?polo_id=${poloId}`);
+    const { data } = await response.json();
+    setExtensoes(data);
+  };
+
+  const fetchTiposSelecao = async () => {
+    const response = await fetch(`/tipos-selecao`);
+    const { data } = await response.json();
+    setTiposSelecao(data);
+  };
+
+  const fetchCursos = async () => {
+    const response = await fetch(`/cursos`);
+    const { data } = await response.json();
+    setCursos(data);
+  };
+
+  const fetchInstituicoes = async () => {
+    const response = await fetch(
+      `/api/instituicoes` +
+        (instituicaoQuery ? `?${instituicaoQuery.toString()}` : "")
+    );
+    const { data } = await response.json();
+
+    setInstituicoes(data);
+  };
 
   useEffect(() => {
-    const fetchExtensoes = async () => {
-      if (!poloId) return;
-
-      const response = await fetch(`/polos/extensoes?polo_id=${poloId}`);
-      const { data } = await response.json();
-      setExtensoes(data);
-    };
+    fetchInstituicoes();
+  }, [instituicaoQuery]);
+  
+  useEffect(() => {
+    form.resetField("extensaoId");
 
     fetchExtensoes();
   }, [poloId]);
-  
-  useEffect(() => {
-    const fetchTiposSelecao = async () => {
-      const response = await fetch(`/tipos-selecao`);
-      const { data } = await response.json();
-      setTiposSelecao(data);
-    };
 
+  useEffect(() => {
+    if (tiposSelecao.length > 0) return;
     fetchTiposSelecao();
   }, []);
 
   useEffect(() => {
-    const fetchCursos = async () => {
-      const response = await fetch(`/cursos`);
-      const { data } = await response.json();
-      setCursos(data);
-    };
-
+    if (cursos.length > 0) return;
     fetchCursos();
   }, []);
 
@@ -107,34 +145,49 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-
           <div className="w-full flex flex-col gap-4 md:flex-row">
-            <MyTextField             
-              control={form.control} 
-              name="year" 
-              placeholder="Ano" />
+            <MyTextField
+              control={form.control}
+              name="year"
+              placeholder="Ano"
+              maxLength={4}
+              mask={(value) => value.replace(/\D/g, "")}
+            />
             <MyTextField
               control={form.control}
               name="name"
               placeholder="Nome"
+              mask={(value) => value.replace(/\d/g, "")}
             />
             <MyTextField
               control={form.control}
               name="phone"
               placeholder="Telefone"
+              mask={(value) => {
+                let justNumber = value.replace(/\D/g, "");
+
+                if (justNumber.length >= 11)
+                  justNumber = justNumber.slice(0, 11);
+
+                const formatted = justNumber
+                  .replace(/^(\d{2})(\d)/, "($1) $2")
+                  .replace(/(\d{5})(\d)/, "$1-$2");
+
+                return formatted;
+              }}
             />
- 
           </div>
           <MyCombobox
-              control={form.control}
-              label={"Polo"}
-              name="poloId"
-              placeholder="Selecione o polo"
-              options={polos.map(({ id, name }) => ({
-                label: name,
-                value: id.toString(),
-              }))}
-            />
+            control={form.control}
+            label={"Polo"}
+            name="poloId"
+            placeholder="Selecione o polo"
+            options={polos.map(({ id, name }) => ({
+              label: name,
+              value: id.toString(),
+            }))}
+            modal={true}
+          />
           <MyCombobox
             label={"Extensão"}
             control={form.control}
@@ -145,25 +198,39 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
               label: name,
               value: id.toString(),
             }))}
+            modal={true}
           />
-          <div className="w-full flex flex-col gap-4 md:flex-row">
-          <MyTextField
+          <MyCombobox
+            onInputChange={handleSearch}
+            onSelectValue={(value) => {
+              const institutionSelected = instituicoes.find((i) => i.id == value);
+              const {municipio, uf} = institutionSelected as InstituicaoEnsino;
+
+              if(isValidValue(municipio) && isValidValue(uf)){
+                setIsExtensaoDisabled(true);
+                form.setValue("institutionLocation", `${municipio} - ${uf}`);
+                return 
+              }
+
+              form.setValue("institutionLocation",'');
+              setIsExtensaoDisabled(false);
+            }}
+            label={"Instuição"}
             control={form.control}
-            name="placing"
-            placeholder="Colocação do aprovado"
-          />
-          <MyTextField
-            control={form.control}
-            name="institution"
-            placeholder="Nome da instituição"
+            name="institutionId"
+            placeholder="Selecione a instituição"
+            options={instituicoes.map(({ id, name }) => ({
+              label: name,
+              value: id.toString(),
+            }))}
+            modal={true}
           />
           <MyTextField
             control={form.control}
             name="institutionLocation"
             placeholder="Localização da instituição"
-          />            
-          </div>
-
+            disabled={isExtensaoDisabled}
+          />
           <MyCombobox
             control={form.control}
             name="courseId"
@@ -173,17 +240,34 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
               label: name,
               value: id.toString(),
             }))}
+            modal={true}
           />
+          <div className="w-full flex flex-col gap-4 md:flex-row">
+            <MyTextField
+              className="flex-1"
+              control={form.control}
+              name="placing"
+              placeholder="Colocação do aprovado"
+              maxLength={4}
+              mask={(value) => {
+                let newValue = value.replace(/\D/g, "").slice(0, 3);
+                if (newValue.length > 0 && !newValue.endsWith("º")) {
+                  newValue += "º";
+                }
+                return newValue;
+              }}
+            />
 
-          <MySelectField
-            control={form.control}
-            name="selectionTypeId"
-            placeholder="Selecione o tipo de seleção"
-            options={tiposSelecao.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
-          />
+            <MySelectField
+              control={form.control}
+              name="selectionTypeId"
+              placeholder="Selecione o tipo de seleção"
+              options={tiposSelecao.map(({ id, name }) => ({
+                label: name,
+                value: id.toString(),
+              }))}
+            />
+          </div>
         </div>
         <DialogFooter className="mt-4">
           {pending ? <ButtonLoading /> : <Button type="submit">Salvar</Button>}

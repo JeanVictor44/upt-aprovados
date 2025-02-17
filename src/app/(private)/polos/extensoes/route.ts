@@ -15,8 +15,6 @@ export async function GET(request: Request) {
         .select('*')
         .eq('polo_id', poloId) as { data: Polo[] }
     
-        console.log(data)
-
     return new Response(JSON.stringify({ data }), {
         headers: { 'Content-Type': 'application/json' }
     })

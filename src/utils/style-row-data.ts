@@ -14,7 +14,7 @@ export const styleRowData = (workSheet: Excel.Worksheet) => {
                 }
                 
                 //Aplica borda apenas nas colunas anteriores a L
-                if(cell.address.includes('L')){
+                if(cell.address.includes('M')){
                     return 
                 }else {
                     cell.border = {

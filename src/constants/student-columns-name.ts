@@ -7,7 +7,8 @@ export const STUDENT_COLUMNS = [
     {key:'institutionLocation',width:45},
     {key:'selectionType', width:20},
     {key:'placing', width:45},
-    { key:'extensao', width: 50},
+    {key:'extensao', width: 50},
     {key:'polo',width: 30},
-    {key:'editionYear', width:35}
+    {key:'editionYear', width:35},
+    {key: 'nome_gestor', width:35},
 ]

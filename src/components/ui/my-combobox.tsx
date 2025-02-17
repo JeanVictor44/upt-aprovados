@@ -3,11 +3,11 @@
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
 import { FormControl, FormField, FormItem, FormMessage } from "./form"
-import { Popover, PopoverTrigger } from "./popover"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { Check, ChevronsUpDown } from "lucide-react"
-import { PopoverContent } from "@radix-ui/react-popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./command"
 import { Control, FieldValues, Path } from "react-hook-form"
+import { useState } from "react";
 
 interface Options {
   label: string;
@@ -24,6 +24,9 @@ interface MySelectFieldProps<ControlType extends FieldValues> {
   className?: string;
   formDescription?: string;
   disabled?: boolean;
+  onInputChange?: (value: string) => void;
+  onSelectValue?: (value: unknown ) => void;
+  modal?: boolean;
 }
 
 export function MyCombobox<ControlType extends FieldValues>({
@@ -32,15 +35,21 @@ export function MyCombobox<ControlType extends FieldValues>({
     name,
     options,
     placeholder,
+    onInputChange,
+    onSelectValue,
+    modal,
+    disabled,
 }: MySelectFieldProps<ControlType>) {
+  const [open, setOpen] = useState(false);
+
     return (
       <FormField
         control={control}
         name={name}
         render={({ field }) => (
           <FormItem>
-            <Popover >
-              <PopoverTrigger asChild className="w-full">
+            <Popover modal={modal} open={open} onOpenChange={setOpen}>
+              <PopoverTrigger disabled={disabled} asChild className="w-full">
                 <FormControl>
                   <Button
                     variant="outline"
@@ -59,11 +68,14 @@ export function MyCombobox<ControlType extends FieldValues>({
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height]">
+              <PopoverContent style={{ pointerEvents: "auto" }} className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height]">
                 <Command className="w-max-[300px]">
                   <CommandInput
                     placeholder={placeholder}
                     className="h-9"
+                    onInput={(e) => {
+                      if(onInputChange) onInputChange(e?.currentTarget?.value)
+                    }}
                   />
                   <CommandList className="w-max-[300px]">
                     <CommandEmpty>Sem resultados.</CommandEmpty>
@@ -73,7 +85,9 @@ export function MyCombobox<ControlType extends FieldValues>({
                           value={option.label}
                           key={option.value}
                           onSelect={() => {
+                            if(onSelectValue) onSelectValue(option.value)
                             field.onChange(option.value)
+                            setOpen(false)
                           }}
                         >
                           {option.label}

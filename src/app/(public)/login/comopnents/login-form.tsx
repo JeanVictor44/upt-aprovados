@@ -31,7 +31,7 @@ export function LoginForm({
   const [state, loginFormAction, pending] = useActionState(loginAction, createInitialState<Login>());
   const [submitted, setSubmitted] = useState(false);
   
-  useFormFeedback(state, submitted, () => redirect('/gestores'));
+  useFormFeedback(state, submitted, () => redirect('/aprovados'));
 
   function onSubmit(data: Login) {
       const formData = new FormData();

@@ -3,7 +3,6 @@ import { base64LogoUneb, base64LogoUPT} from '../constants/base64-files'
 
 
 export const createHeaderExcel = (workSheet: Excel.Worksheet, workbook: Excel.Workbook) => {
-    
     workSheet.mergeCells('A1', 'E1')
     workSheet.mergeCells('A2', 'E2')
     workSheet.mergeCells('A3', 'E3')
@@ -22,7 +21,7 @@ export const createHeaderExcel = (workSheet: Excel.Worksheet, workbook: Excel.Wo
     A1.value = 'UNIVERSIDADE DO ESTADO DA BAHIA'
     A2.value = 'Autorização Decreto n.º 9237/86. dou 18/07/96. Reconhecimento: Portaria 909/95, DOU 01/08-95'
     A4.value = 'PROGRAMA UNIVERSIDADE PARA TODOS'
-    A7.value = 'RELAÇÃO DOS ALUNOS APROVADOS NOS VESTIBULARES/PROCESSOS SELETIVOS 2020/2021'
+    A7.value = 'RELAÇÃO DOS ALUNOS APROVADOS NOS VESTIBULARES/PROCESSOS SELETIVOS'
     
     A1.font = {bold: true}
     A4.font = {bold:true, color: {argb: '002060'}}

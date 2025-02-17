@@ -86,6 +86,20 @@ model Curso {
   @@map("curso") 
 }
 
+model Instituicao {
+  id                    Int         @id @default(autoincrement())
+  codigo_ies            String
+  name                  String
+  uf                    String
+  municipio             String
+  codigo_municipio_ibge String
+  sigla                 String? 
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  alunosAprovados       AlunoAprovado[]
+
+  @@map("instituicao") 
+}
 
 model AlunoAprovado {
   id        Int      @id @default(autoincrement())
@@ -94,8 +108,9 @@ model AlunoAprovado {
   year      String?
   placing   Int?      
   
-  institutionName String @map("institution_name")
-  institutionLocation String @map("institution_location")
+  institutionId Int   @map("institution_id")
+  institution   Instituicao @relation(fields: [institutionId], references: [id])
+  institutionLocation String?
 
   extensaoId Int      @map("extensao_id")
   extensao   Extensao @relation(fields: [extensaoId], references: [id])
@@ -109,6 +124,8 @@ model AlunoAprovado {
   tipoSelecaoId Int   @map("tipo_selecao_id")
   tipoSelecao TipoSelecao @relation(fields: [tipoSelecaoId], references: [id])
 
+  nomeGestor String @map("nome_gestor")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

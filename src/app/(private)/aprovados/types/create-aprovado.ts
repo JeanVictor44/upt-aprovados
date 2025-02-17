@@ -3,7 +3,7 @@ export interface CreateAprovado {
     phone?: string;
     extensaoId: string;
     institutionLocation: string;
-    institution: string;
+    institutionId: string;
     courseId:string;
     placing: string;
     selectionTypeId: string;
