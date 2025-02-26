@@ -36,7 +36,7 @@ export default function AprovadosPage() {
           description: "Aprovado deletado com sucesso!",
           variant: "success",
         });
-        fetchAlunosByUserPolo();
+        fetchAprovadosByUserPolo();
       }else {
         toast({
           description: "Erro ao deletar usuário!",
@@ -46,15 +46,15 @@ export default function AprovadosPage() {
     })
   }
 
-  const fetchAlunosByUserPolo = async () => {
-    const response = await fetch(`/polos/usuario/aprovados`);
+  const fetchAprovadosByUserPolo = async (params?: URLSearchParams) => {
+    const response = await fetch(`/polos/usuario/aprovados`  + (params ? `?${params.toString()}` : ""));
     const { data } = await response.json();
     setAprovados(data);
   };
 
 
   useEffect(() => {
-    fetchAlunosByUserPolo();
+    fetchAprovadosByUserPolo();
   }, []);
 
   function handleSelectAprovado(aprovado: Aprovado) {
@@ -71,6 +71,8 @@ export default function AprovadosPage() {
         </p>
       </header>
       <section className="flex mb-4 gap-4">
+        {/* <SearchAprovado fetchAprovados={fetchAprovadosByUserPolo} /> */}
+              
         <Button
           className="ml-auto"
           onClick={() => setIsCreateGestorDialogOpen(true)}
@@ -86,13 +88,13 @@ export default function AprovadosPage() {
           open={isCreateAprovadoDialogOpen}
           setOpen={(isOpen) => setIsCreateGestorDialogOpen(isOpen)}
           polos={polos}
-          revalidate={fetchAlunosByUserPolo}
+          revalidate={fetchAprovadosByUserPolo}
         />
         <EditAprovadoDialog
           open={isEditAprovadoDialogOpen}
           setOpen={(isOpen) => setIsEditAprovadoDialogOpen(isOpen)}
           polos={polos}
-          revalidate={fetchAlunosByUserPolo}
+          revalidate={fetchAprovadosByUserPolo}
           selectedAprovado={selectedAprovado}
         />
       </section>

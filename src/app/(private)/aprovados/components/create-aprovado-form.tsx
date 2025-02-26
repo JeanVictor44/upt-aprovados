@@ -20,6 +20,7 @@ import { Domain } from "@/types/domain";
 import { MyCombobox } from "@/components/ui/my-combobox";
 import { InstituicaoEnsino } from "@/types/instituicao";
 import { useDebouncedCallback } from "use-debounce";
+import { Curso } from "@/types/curso";
 
 interface Props {
   onSave: () => void;
@@ -32,7 +33,7 @@ function isValidValue(value: unknown): value is string {
 
 export default function CreateAprovadoForm({ onSave, polos }: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
-  const [cursos, setCursos] = useState<Domain[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
   const [tiposSelecao, setTiposSelecao] = useState<Domain[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoEnsino[]>([]);
   const [instituicaoQuery, setInstituicaoQuery] = useState(
@@ -82,7 +83,7 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
     formData.append("institutionLocation", data.institutionLocation);
     formData.append("institutionId", data.institutionId);
     formData.append("courseId", data.courseId);
-    formData.append("placing", data.placing);
+    if (data.placing) formData.append("placing", data.placing);
     formData.append("selectionTypeId", data.selectionTypeId);
     formData.append("year", data.year);
     formData.append("poloId", data.poloId);
@@ -149,9 +150,9 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
             <MyTextField
               control={form.control}
               name="year"
-              placeholder="Ano"
+              placeholder="Edição"
               maxLength={4}
-              mask={(value) => value.replace(/\D/g, "")}
+              mask={(value) => value?.replace(/\D/g, "")}
             />
             <MyTextField
               control={form.control}
@@ -236,8 +237,8 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
             name="courseId"
             label="Curso"
             placeholder="Selecione o curso"
-            options={cursos.map(({ id, name }) => ({
-              label: name,
+            options={cursos.map(({ id, name, tipo_curso }) => ({
+              label: `${tipo_curso.name} em ${name}`,
               value: id.toString(),
             }))}
             modal={true}

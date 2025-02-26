@@ -33,6 +33,10 @@ interface AprovadoQuery  {
     course: {
         id: number;
         name: string;
+        tipo_curso: {
+            id: number;
+            name: string;
+        },
     };
     selectionType: {
         id: number;
@@ -45,7 +49,7 @@ const generateStudentsExcel = async() => {
     try {
         const workSheet = workbook.addWorksheet('Lista de aprovações', {views: [{showGridLines:false}]})
         createHeaderExcel(workSheet, workbook)
-        createRowTitle(workSheet, ['N°', 'ALUNO', 'TELEFONE DE CONTATO', 'CURSO DE APROVAÇÃO', 'UNIVERSIDADE/FACULDADE', 'LOCAL/MUNICÍPIO DA \n UNIVERSIDADE/FACULDADE', 'TIPO DE SELEÇÃO', 'COLOCAÇÃO NO VESTIBULAR/PROCESSO SELETIVO', `MUNICÍPIO/EXTENSÃO DA TURMA UPT ${new Date().getFullYear()}`, 'POLO','ANO DE EDIÇÃO DO UPT', 'GESTOR'], /[a-l]/gi, STUDENT_COLUMNS)
+        createRowTitle(workSheet, ['N°', 'ALUNO', 'TELEFONE DE CONTATO', 'CURSO DE APROVAÇÃO', 'MODALIDADE DA GRADUAÇÃO', 'UNIVERSIDADE/FACULDADE', 'LOCAL/MUNICÍPIO DA \n UNIVERSIDADE/FACULDADE', 'TIPO DE SELEÇÃO', 'COLOCAÇÃO NO VESTIBULAR/PROCESSO SELETIVO', `MUNICÍPIO/EXTENSÃO DA TURMA UPT ${new Date().getFullYear()}`, 'POLO','ANO DE EDIÇÃO DO UPT', 'GESTOR'], /[a-m]/gi, STUDENT_COLUMNS)
         
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser();
@@ -56,6 +60,10 @@ const generateStudentsExcel = async() => {
         
         let aprovados:AprovadoQuery[] = [];
 
+        const {data: tiposCurso} = await supabase
+        .from('tipo_curso')
+        .select('id, name')
+        
         if(user.user_metadata.is_admin) {
             const { data, error } = await supabase
             .from('aprovado')
@@ -71,7 +79,7 @@ const generateStudentsExcel = async() => {
                 updatedAt, 
                 polo:polo_id(id, name), 
                 extensao:extensao_id(id, name), 
-                course:curso_id(id, name), 
+                course:curso_id(id, name, tipo_curso_id), 
                 selectionType:tipo_selecao_id(id, name),
                 nome_gestor
             `);
@@ -84,7 +92,14 @@ const generateStudentsExcel = async() => {
                 console.error(error)
             }
 
-            aprovados = data as unknown as AprovadoQuery[]
+            aprovados = data.map((aprovado) => ({
+                ...aprovado,
+                course: {
+                    id:(aprovado.course as unknown as Domain).id,
+                    name: (aprovado.course as unknown as Domain).name,
+                    tipo_curso: tiposCurso?.find((tipoCurso) => tipoCurso.id === (aprovado.course as unknown as {tipo_curso_id: number})?.tipo_curso_id)?.name
+                }
+            })) as unknown as AprovadoQuery[]
         }else {
             const { data, error } = await supabase
             .from('aprovado')
@@ -100,7 +115,7 @@ const generateStudentsExcel = async() => {
                 updatedAt, 
                 polo:polo_id(id, name), 
                 extensao:extensao_id(id, name), 
-                course:curso_id(id, name), 
+                course:curso_id(id, name, tipo_curso_id), 
                 selectionType:tipo_selecao_id(id, name),
                 nome_gestor
             `)
@@ -114,23 +129,31 @@ const generateStudentsExcel = async() => {
                 console.error(error)
             }
 
-            aprovados = data as unknown as AprovadoQuery[]
+            aprovados = data.map((aprovado) => ({
+                ...aprovado,
+                course: {
+                    id:(aprovado.course as unknown as Domain).id,
+                    name: (aprovado.course as unknown as Domain).name,
+                    tipo_curso: tiposCurso?.find((tipoCurso) => tipoCurso.id === (aprovado.course as unknown as {tipo_curso_id: number})?.tipo_curso_id)?.name
+                }
+            })) as unknown as AprovadoQuery[]
         }
         // Insert supabase data
         aprovados.forEach((singleData, index) => {
             const newSingleData = {
                 number: index + 1,
                 name: singleData?.name,
-                phone: singleData?.phone,
+                phone: singleData?.phone ? singleData?.phone : 'Não informado',
                 course: (singleData?.course as unknown as Domain)?.name,
                 institution: (singleData?.institution as unknown as {name: string})?.name,
                 institutionLocation: singleData?.institutionLocation,
                 selectionType: (singleData?.selectionType as unknown as Domain)?.name,
-                placing: singleData?.placing + '°',
+                placing: singleData?.placing ? singleData?.placing + '°': 'Não informado',
                 extensao: (singleData?.extensao as unknown as Domain)?.name,
                 polo: (singleData?.polo as unknown as Domain)?.name,
                 editionYear: singleData?.year,
-                nome_gestor: singleData?.nome_gestor
+                nome_gestor: singleData?.nome_gestor,
+                tipo_curso: singleData?.course?.tipo_curso
             }
             workSheet.addRow(newSingleData)
         })

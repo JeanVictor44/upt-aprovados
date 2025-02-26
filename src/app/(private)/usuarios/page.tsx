@@ -36,8 +36,9 @@ export default function UsuariosPage() {
   },[])
 
   async function fetchUsuarios(params?: URLSearchParams) {
-    const usuarios = await fetch("/usuarios/api" + (params ? `?${params.toString()}` : "")).then((res) => res.json());
-    setUsuarios(usuarios.data);
+    const usuarios = await fetch("/usuarios/api" + (params ? `?${params.toString()}` : ""))
+    const {data} = await usuarios.json()
+    setUsuarios(data);
   }
   async function fetchPolosData() {
     const polos = await fetch("/polos").then((res) => res.json());

@@ -3,6 +3,7 @@ export const STUDENT_COLUMNS = [
     {key:'name', width: 35},
     {key: 'phone', width:35},
     {key: 'course', width:35},
+    {key: 'tipo_curso', width:35},
     {key: 'institution', width:35},
     {key:'institutionLocation',width:45},
     {key:'selectionType', width:20},

@@ -1,7 +1,6 @@
 'use server'
 
 import { FormState } from "@/types/form-state"
-import { revalidatePath } from "next/cache";
 import { CreateAprovadoSchema } from "../schemas/create-aprovado-schema";
 import { createClient } from "@/utils/supabase/server";
 import { CreateAprovado } from "../types/create-aprovado";
@@ -31,12 +30,16 @@ export async function createAprovadoAction(prevState: CreateAprovadoFormState | 
     }
     const data = validatedFields.data
     const supabase = await createClient()
+
+    console.log(data.phone)
+    console.log(data.placing)
+
     const { error } = await supabase.from('aprovado').insert([
         {
             name: data.name,
-            ...(data?.phone && { phone: data.phone }),
+            ...(data?.phone?.trim() !== undefined && { phone: data.phone }),
             year: data.year,
-            placing: data.placing,
+            ...(data?.placing?.trim() !== 'undefined' && { placing: Number(data.placing) }),
             institution_id: data.institutionId,
 
             institutionLocation: data.institutionLocation,
@@ -57,6 +60,4 @@ export async function createAprovadoAction(prevState: CreateAprovadoFormState | 
             errors: {},
         }
     }
-    
-    revalidatePath('/aprovados')
 }

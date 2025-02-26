@@ -21,6 +21,7 @@ import { InstituicaoEnsino } from "@/types/instituicao";
 import { useDebouncedCallback } from "use-debounce";
 import { editAprovadoAction } from "../actions/edit-aprovado-action";
 import { Aprovado } from "../types/aprovado";
+import { Curso } from "@/types/curso";
 
 interface Props {
   onSave: () => void;
@@ -34,7 +35,7 @@ function isValidValue(value: unknown): value is string {
 
 export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
-  const [cursos, setCursos] = useState<Domain[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
   const [tiposSelecao, setTiposSelecao] = useState<Domain[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoEnsino[]>([]);
   const [instituicaoQuery, setInstituicaoQuery] = useState(
@@ -97,7 +98,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     formData.append("institutionLocation", data.institutionLocation);
     formData.append("institutionId", data.institutionId);
     formData.append("courseId", data.courseId);
-    formData.append("placing", data.placing);
+    if(data.placing) formData.append("placing", data.placing);
     formData.append("selectionTypeId", data.selectionTypeId);
     formData.append("year", data.year);
     formData.append("poloId", data.poloId);
@@ -164,29 +165,29 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             <MyTextField
               control={form.control}
               name="year"
-              placeholder="Ano"
+              placeholder="Edição"
               maxLength={4}
-              mask={(value) => value.replace(/\D/g, "")}
+              mask={(value) => value?.replace(/\D/g, "")}
             />
             <MyTextField
               control={form.control}
               name="name"
               placeholder="Nome"
-              mask={(value) => value.replace(/\d/g, "")}
+              mask={(value) => value?.replace(/\d/g, "")}
             />
             <MyTextField
               control={form.control}
               name="phone"
               placeholder="Telefone"
               mask={(value) => {
-                let justNumber = value.replace(/\D/g, "");
+                let justNumber = value?.replace(/\D/g, "");
 
                 if (justNumber.length >= 11)
-                  justNumber = justNumber.slice(0, 11);
+                  justNumber = justNumber?.slice(0, 11);
 
                 const formatted = justNumber
-                  .replace(/^(\d{2})(\d)/, "($1) $2")
-                  .replace(/(\d{5})(\d)/, "$1-$2");
+                  ?.replace(/^(\d{2})(\d)/, "($1) $2")
+                  ?.replace(/(\d{5})(\d)/, "$1-$2");
 
                 return formatted;
               }}
@@ -234,7 +235,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             control={form.control}
             name="institutionId"
             placeholder="Selecione a instituição"
-            options={instituicoes.map(({ id, name }) => ({
+            options={instituicoes?.map(({ id, name }) => ({
               label: name,
               value: id.toString(),
             }))}
@@ -251,8 +252,8 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             name="courseId"
             label="Curso"
             placeholder="Selecione o curso"
-            options={cursos.map(({ id, name }) => ({
-              label: name,
+            options={cursos.map(({ id, name, tipo_curso }) => ({
+              label: `${tipo_curso.name} em ${name}`,
               value: id.toString(),
             }))}
             modal={true}

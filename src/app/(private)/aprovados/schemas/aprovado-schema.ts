@@ -7,8 +7,8 @@ export const AprovadoSchema = z.object({
     }).trim().min(1, {
         message: 'O nome é obrigatório',
     }),
-    phone: z.string().optional().refine((telefone) => {
-        if(telefone && telefone.length < 15) return false
+    phone: z.string().nullable().optional().refine((telefone) => {
+        if(telefone && telefone?.length < 15) return false
         
         return true
     },{
@@ -39,9 +39,9 @@ export const AprovadoSchema = z.object({
     }).trim().min(1, {
         message: 'O curso é obrigatório',
     }),
-    placing: z.string().optional().transform((value) => {
-        if (value) {
-            return value.split('º')[0];
+    placing: z.string().nullable().optional().transform((value) => {
+        if (Boolean(value)) {
+            return value?.split('º')[0];
         }
         return value;
     }),
@@ -51,8 +51,8 @@ export const AprovadoSchema = z.object({
         message: 'O tipo de seleção é obrigatório',
     }),
     year: z.string({
-        message: 'O ano é obrigatório',
+        message: 'A edição é obrigatório',
     }).trim().min(4, {
-        message: 'O ano deve conter 4 dígitos',
+        message: 'A edição deve conter 4 dígitos',
     }),
 });

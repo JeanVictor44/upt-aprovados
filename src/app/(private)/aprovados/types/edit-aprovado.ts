@@ -5,7 +5,7 @@ export interface EditAprovado {
     institutionLocation: string;
     institutionId: string;
     courseId:string;
-    placing: string;
+    placing?: string;
     selectionTypeId: string;
     year: string;
     poloId: string;

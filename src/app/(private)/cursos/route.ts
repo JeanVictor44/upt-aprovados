@@ -5,7 +5,11 @@ export async function GET() {
     
     const { data: cursos } = await supabase
         .from('curso')
-        .select('*')
+        .select(`
+            id,
+            name,
+            tipo_curso: tipo_curso_id(id, name)    
+        `)
 
     return new Response(JSON.stringify({ data: cursos }), {
         headers: { 'Content-Type': 'application/json' }

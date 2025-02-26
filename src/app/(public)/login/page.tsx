@@ -10,7 +10,7 @@ export default function LoginPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <Image className="mx-auto mb-8" alt="Logo" width={180} height={150} src="/logo-uneb.svg" />
+            <Image className="mx-auto mb-8" alt="Logo" width={500} height={50} src="/logos.png" />
             <LoginForm />
           </div>
         </div>

@@ -1,7 +1,6 @@
 'use server'
 
 import { FormState } from "@/types/form-state"
-import { revalidatePath } from "next/cache";
 import { CreateAprovadoSchema } from "../schemas/create-aprovado-schema";
 import { createClient } from "@/utils/supabase/server";
 import { CreateAprovado } from "../types/create-aprovado";
@@ -32,9 +31,9 @@ export async function editAprovadoAction(prevState: EditAprovadoFormState | unde
     const supabase = await createClient()
     const { error } = await supabase.from('aprovado').update({
         name: data.name,
-        ...(data?.phone && { phone: data.phone }),
+        ...(data?.phone?.trim() !== undefined && { phone: data.phone }),
         year: data.year,
-        placing: Number(data.placing),
+        ...(data?.placing?.trim() !== 'undefined' && { placing: Number(data.placing) }),        
         institution_id: data.institutionId,
         institutionLocation: data.institutionLocation,
         extensao_id: data.extensaoId,
@@ -42,7 +41,7 @@ export async function editAprovadoAction(prevState: EditAprovadoFormState | unde
         polo_id: data.poloId,
         curso_id: data.courseId,
         tipo_selecao_id: data.selectionTypeId,
-    }).eq('id', formData.get('id')) // Assuming 'id' is the primary key to identify the record
+    }).eq('id', formData.get('id'))
 
     if (error) {
       console.log('error', error)
@@ -51,6 +50,4 @@ export async function editAprovadoAction(prevState: EditAprovadoFormState | unde
             errors: {},
         }
     }
-    
-    revalidatePath('/aprovados')
 }

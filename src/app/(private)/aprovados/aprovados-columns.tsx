@@ -15,7 +15,7 @@ export const aprovadosColumns: ({}: Props) => ColumnDef<Aprovado>[] = ({onEdit, 
   {
     accessorKey: "year",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Ano" />
+      <DataTableColumnHeader column={column} title="Edição" />
     ),
   },
   {
@@ -43,6 +43,14 @@ export const aprovadosColumns: ({}: Props) => ColumnDef<Aprovado>[] = ({onEdit, 
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Telefone" />
     ),
+    cell(props) {
+      const { row } = props;
+      return (
+        <span>
+          {row.original.phone ? row.original.phone : "Não informado"}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "polo",
@@ -109,7 +117,7 @@ export const aprovadosColumns: ({}: Props) => ColumnDef<Aprovado>[] = ({onEdit, 
       const { row } = props;
       return (
         <span>
-          <Badge>{row.original.placing}̣°</Badge>
+          {row.original.placing ? <Badge>{row.original.placing + '°'}</Badge> : "Não informado"}
         </span>
       );
     },
