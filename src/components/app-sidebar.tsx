@@ -39,6 +39,17 @@ const data = {
         },
       ],
     },
+    {
+      title: 'Comparar listas',
+      url: '/comparar-listas',
+      justAdmin: false,
+      items: [
+        {
+          title: 'Comparar listas',
+          url: '/comparar-listas'
+        }
+      ]
+    }
   ],
 };
  
