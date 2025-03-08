@@ -29,10 +29,6 @@ interface Props {
   selectedAprovado: Aprovado | null;
 }
 
-function isValidValue(value: unknown): value is string {
-  return value !== null && value !== undefined && value !== "" && value !== "null";
-}
-
 export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -41,8 +37,10 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
   const [instituicaoQuery, setInstituicaoQuery] = useState(
     new URLSearchParams('?query=' + selectedAprovado?.institution.name)
   );
-  const [disabled, setDisabled] = useState(false);
-
+  const [municipios, setMunicipios] = useState<{id: number, name: string}[]>([]);
+  const [municipioQuery, setMunicipioQuery] = useState(
+    new URLSearchParams('?query=' + selectedAprovado?.institution_location)
+  );
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(instituicaoQuery);
 
@@ -53,6 +51,18 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     }
     setInstituicaoQuery(params);
   }, 500);
+
+  const handleSearchMunicipio = useDebouncedCallback(async(term: string) => {
+    const params = new URLSearchParams(municipioQuery);
+
+    if (term) {
+      params.set("query", term);
+    } else {
+      params.delete("query");
+    }
+    setMunicipioQuery(params);
+  }, 500);
+
 
   const form = useForm<EditAprovado>({
     resolver: zodResolver(CreateAprovadoSchema),
@@ -138,10 +148,24 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     setInstituicoes(data);
   };
 
+  const fetchMunicpios = async () => {
+    const response = await fetch(
+      `/api/municipios` +
+        (municipioQuery ? `?${municipioQuery.toString()}` : "")
+    );
+    const { data } = await response.json();
+
+    setMunicipios(data);
+  };
+
   useEffect(() => {
     fetchInstituicoes();
   }, [instituicaoQuery]);
 
+  useEffect(() => {
+    fetchMunicpios();
+  }, [municipioQuery]);
+  
   useEffect(() => {
     form.resetField("extensaoId");
     fetchExtensoes();
@@ -216,21 +240,9 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             }))}
             modal={true}
           />
+
           <MyCombobox
             onInputChange={handleSearch}
-            onSelectValue={(value) => {
-              const institutionSelected = instituicoes.find((i) => i.id == value);
-              const {municipio, uf} = institutionSelected as InstituicaoEnsino;
-
-              if(isValidValue(municipio) && isValidValue(uf)){
-                setDisabled(true);
-                form.setValue("institutionLocation", `${municipio} - ${uf}`);
-                return 
-              }
-
-              form.setValue("institutionLocation",'');
-              setDisabled(false);
-            }}
             label={"Instuição"}
             control={form.control}
             name="institutionId"
@@ -241,11 +253,17 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             }))}
             modal={true}
           />
-          <MyTextField
+            <MyCombobox
+            onInputChange={handleSearchMunicipio}
+            label={"Local da instituição"}
             control={form.control}
             name="institutionLocation"
-            placeholder="Localização da instituição"
-            disabled={disabled}
+            placeholder="Selecione o local da instituição"
+            options={municipios.map((municipio) => ({
+              label: municipio.name,
+              value: municipio.name.toString(),
+            }))}
+            modal={true}
           />
           <MyCombobox
             control={form.control}

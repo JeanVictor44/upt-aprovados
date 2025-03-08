@@ -80,10 +80,10 @@ export function MyCombobox<ControlType extends FieldValues>({
                   <CommandList className="w-max-[300px]">
                     <CommandEmpty>Sem resultados.</CommandEmpty>
                     <CommandGroup>
-                      {options.map((option) => (
+                      {options.map((option, index) => (
                         <CommandItem
                           value={option.label}
-                          key={option.value}
+                          key={option.value+index}
                           onSelect={() => {
                             if(onSelectValue) onSelectValue(option.value)
                             field.onChange(option.value)

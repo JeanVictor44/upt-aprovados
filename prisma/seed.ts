@@ -6,12 +6,14 @@ import { seedTiposCurso } from "./seeds/tipo-curso";
 import { seedExtensoes } from "./seeds/extensoes";
 import { seedTiposSelecao } from "./seeds/tipos-selecao";
 import { seedUniversidadesBrasileiras } from "./seeds/universidades-brasileiras";
+import { seedMunicipios } from "./seeds/municipios";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Rodando seeds...");
-
+  /* 
+  await seedMunicipios();
   await seedPolos();
   await seedExtensoes();
   await seedAreasConhecimento();
@@ -21,6 +23,7 @@ async function main() {
   await seedUniversidadesBrasileiras();  
   
   console.log("Seeds concluídas!");
+  */
 }
 
 main()

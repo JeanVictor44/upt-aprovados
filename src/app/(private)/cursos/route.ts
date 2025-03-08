@@ -10,7 +10,8 @@ export async function GET() {
             name,
             tipo_curso: tipo_curso_id(id, name)    
         `)
-
+        .order('name', { ascending: true })
+        
     return new Response(JSON.stringify({ data: cursos }), {
         headers: { 'Content-Type': 'application/json' }
     })

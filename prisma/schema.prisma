@@ -56,6 +56,17 @@ model TipoCurso {
   @@map("tipo_curso") 
 }
 
+model Municipio {
+  id        Int      @id @default(autoincrement())
+  name      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("municipio") 
+}
+
 model TipoSelecao {
   id        Int      @id @default(autoincrement())
   name      String
