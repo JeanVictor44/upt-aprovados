@@ -14,65 +14,64 @@ import { Form } from "@/components/ui/form";
 import { useFormFeedback } from "@/hooks/use-form-feedback";
 import { toast } from "@/hooks/use-toast";
 import { Polo } from "@/types/polo";
-import { CreateAprovado } from "../types/create-aprovado";
-import { createAprovadoAction } from "../actions/create-aprovado-action";
+import { EditAprovado } from "../types/edit-aprovado";
 import { Domain } from "@/types/domain";
 import { MyCombobox } from "@/components/ui/my-combobox";
 import { InstituicaoEnsino } from "@/types/instituicao";
 import { useDebouncedCallback } from "use-debounce";
+import { editAprovadoAction } from "../actions/edit-aprovado-action";
+import { Aprovado } from "../types/aprovado";
+import { CreateCurso } from "../types/create-curso";
+import { CreateCursoSchema } from "../schema/create-curso-schema";
 
 interface Props {
   onSave: () => void;
   polos: Polo[];
+  selectedAprovado: Aprovado | null;
 }
 
 function isValidValue(value: unknown): value is string {
   return value !== null && value !== undefined && value !== "" && value !== "null";
 }
 
-export default function CreateAprovadoForm({ onSave, polos }: Props) {
-  const [extensoes, setExtensoes] = useState<Domain[]>([]);
-  const [cursos, setCursos] = useState<Domain[]>([]);
-  const [tiposSelecao, setTiposSelecao] = useState<Domain[]>([]);
-  const [instituicoes, setInstituicoes] = useState<InstituicaoEnsino[]>([]);
-  const [instituicaoQuery, setInstituicaoQuery] = useState(
-    new URLSearchParams()
-  );
-  const [isExtensaoDisabled, setIsExtensaoDisabled] = useState(false);
-  const form = useForm<CreateAprovado>({
-    resolver: zodResolver(CreateAprovadoSchema),
-  });
-  const poloId = form.watch("poloId");
+export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
+  const [areasConhecimento, setAreasConhecimento] = useState<Domain[]>([]);
 
-  const handleSearch = useDebouncedCallback((term: string) => {
-    const params = new URLSearchParams(instituicaoQuery);
-
-    if (term) {
-      params.set("query", term);
-    } else {
-      params.delete("query");
+  const form = useForm<CreateCurso>({
+    resolver: zodResolver(CreateCursoSchema),
+    defaultValues: {
+      courseId: selectedAprovado?.course.id.toString() || "",
+      institutionId: selectedAprovado?.institution.id.toString() || "",
+      institutionLocation: selectedAprovado?.institution_location || "",
+      name: selectedAprovado?.name || "",
+      phone: selectedAprovado?.phone || "",
+      placing: selectedAprovado?.placing ? selectedAprovado.placing + 'º' : "",
+      extensaoId: selectedAprovado?.extensao?.id.toString() || "",
+      selectionTypeId: selectedAprovado?.selectionType.id.toString() || "",
+      poloId: selectedAprovado?.polo.id.toString() || "",
+      year: selectedAprovado?.year || "",
     }
-    setInstituicaoQuery(params);
-  }, 500);
-
+  });
+  
+  const poloId = form.watch("poloId");
 
   function onSuccess() {
     onSave();
     toast({
-      description: "Aprovado cadastrado com sucesso!",
+      description: "Aprovado editado com sucesso!",
       variant: "success",
     });
     form.reset();
   }
 
-  const [state, createAprovadoFormAction, pending] = useActionState(
-    createAprovadoAction,
-    createInitialState<CreateAprovado>()
+  const [state, editAprovadoFormAction, pending] = useActionState(
+    editAprovadoAction,
+    createInitialState<EditAprovado>()
   );
   const [submitted, setSubmitted] = useState(false);
   useFormFeedback(state, submitted, onSuccess);
 
-  function onSubmit(data: CreateAprovado) {
+  function onSubmit(data: EditAprovado) {
     setSubmitted(true);
     const formData = new FormData();
 
@@ -86,9 +85,10 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
     formData.append("selectionTypeId", data.selectionTypeId);
     formData.append("year", data.year);
     formData.append("poloId", data.poloId);
+    formData.append("id", selectedAprovado?.id.toString() || "");
 
     startTransition(async () => {
-      createAprovadoFormAction(formData);
+      editAprovadoFormAction(formData);
     });
   }
   const fetchExtensoes = async () => {
@@ -124,10 +124,9 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
   useEffect(() => {
     fetchInstituicoes();
   }, [instituicaoQuery]);
-  
+
   useEffect(() => {
     form.resetField("extensaoId");
-
     fetchExtensoes();
   }, [poloId]);
 
@@ -207,13 +206,13 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
               const {municipio, uf} = institutionSelected as InstituicaoEnsino;
 
               if(isValidValue(municipio) && isValidValue(uf)){
-                setIsExtensaoDisabled(true);
+                setDisabled(true);
                 form.setValue("institutionLocation", `${municipio} - ${uf}`);
                 return 
               }
 
               form.setValue("institutionLocation",'');
-              setIsExtensaoDisabled(false);
+              setDisabled(false);
             }}
             label={"Instuição"}
             control={form.control}
@@ -229,7 +228,7 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
             control={form.control}
             name="institutionLocation"
             placeholder="Localização da instituição"
-            disabled={isExtensaoDisabled}
+            disabled={disabled}
           />
           <MyCombobox
             control={form.control}

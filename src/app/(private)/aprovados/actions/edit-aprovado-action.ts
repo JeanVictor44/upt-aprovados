@@ -42,7 +42,7 @@ export async function editAprovadoAction(prevState: EditAprovadoFormState | unde
         polo_id: data.poloId,
         curso_id: data.courseId,
         tipo_selecao_id: data.selectionTypeId,
-    }).eq('id', formData.get('id')) // Assuming 'id' is the primary key to identify the record
+    }).eq('id', formData.get('id'))
 
     if (error) {
       console.log('error', error)

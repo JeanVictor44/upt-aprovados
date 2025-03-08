@@ -40,13 +40,13 @@ const data = {
       ],
     },
     {
-      title: 'Comparar listas',
-      url: '/comparar-listas',
-      justAdmin: false,
+      title: 'Cursos',
+      url: '/cursos',
+      justAdmin: true,
       items: [
         {
-          title: 'Comparar listas',
-          url: '/comparar-listas'
+          title: 'Cursos',
+          url: '/cursos'
         }
       ]
     }
