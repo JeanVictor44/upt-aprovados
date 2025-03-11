@@ -6,17 +6,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+
 export default function PrivateLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-  /* 
-    async function handleLogout() {
-      await supabase.auth.signOut()
-      replace('/login')
-    }
-  */  
+}>) {  
   return(
     <SidebarProvider>
       <AppSidebar />

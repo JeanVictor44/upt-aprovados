@@ -133,7 +133,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
   };
 
   const fetchCursos = async () => {
-    const response = await fetch(`/cursos`);
+    const response = await fetch(`/api/cursos`);
     const { data } = await response.json();
     setCursos(data);
   };

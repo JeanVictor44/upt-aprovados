@@ -119,7 +119,7 @@ export default function CreateAprovadoForm({ onSave, polos }: Props) {
   };
 
   const fetchCursos = async () => {
-    const response = await fetch(`/cursos`);
+    const response = await fetch(`/api/cursos`);
     const { data } = await response.json();
     setCursos(data);
   };
