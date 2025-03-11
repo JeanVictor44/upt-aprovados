@@ -50,25 +50,6 @@ export default function UsuariosPage() {
     setTiposCurso(tiposCurso.data);
   }
 
-  function deleteCurso(id: number) {
-    fetch(`/api/curso/${id}`, {
-      method: "DELETE",
-    }).then((res) => {
-      if (res.status === 200) {
-        toast({
-          description: "Curso deletado com sucesso!",
-          variant: "success",
-        });
-        fetchCursos();
-      } else {
-        toast({
-          description: "Erro ao deletar curso!",
-          variant: "destructive",
-        });
-      }
-    });
-  }
-
   function handleSelectCurso(curso: Curso) {
     setSelectedCurso(curso);
     setIsEditCursoOpen(true);
@@ -99,7 +80,6 @@ export default function UsuariosPage() {
       <section>
         <DataTable
           columns={cursoColummns({
-            deleteCurso,
             onEdit: handleSelectCurso,
           })}
           data={cursos}

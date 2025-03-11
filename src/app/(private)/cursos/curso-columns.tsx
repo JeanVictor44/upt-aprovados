@@ -1,17 +1,15 @@
 import {DataTableColumnHeader} from '@/components/data-table/column-header';
 import {ColumnDef} from '@tanstack/react-table';
-import {Pencil, Trash} from 'lucide-react';
+import {Pencil} from 'lucide-react';
 import {Badge} from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MyAlertDialog } from '@/components/ui/my-alert-dialog';
 import { Curso } from './types/Curso';
 
 interface Props {
-  deleteCurso: (id: number) => void;
   onEdit: (curso: Curso) => void;
 }
 
-export const cursoColummns: ({}: Props) => ColumnDef<Curso>[] = ({deleteCurso, onEdit}: Props) => [
+export const cursoColummns: ({}: Props) => ColumnDef<Curso>[] = ({onEdit}: Props) => [
   {
     accessorKey: 'name',
     header: ({column}) => (
@@ -63,14 +61,6 @@ export const cursoColummns: ({}: Props) => ColumnDef<Curso>[] = ({deleteCurso, o
             }}>
             <Pencil size={18} />
           </Button>
-           {/*
-          <MyAlertDialog title='Deletar Curso' description='Tem certeza que deseja deletar este curso?' onConfirm={() => deleteCurso(row.original.id)}>
-            <Button variant="outline" size="icon">
-              <Trash size={18} />
-            </Button>
-          </MyAlertDialog>
-                */
-        } 
         </div>
       );
     },
