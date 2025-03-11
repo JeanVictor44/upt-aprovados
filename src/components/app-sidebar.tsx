@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -14,6 +15,7 @@ import {
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect,  useState } from "react";
+import { NavUser } from "./nav-user";
 
 const data = {
   navMain: [
@@ -56,11 +58,15 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const supabase = createClient();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<{name: string,email: string}>();
 
   useEffect(() => {
     (async( )=> {
       const {data: {user}} = await supabase.auth.getUser()
-      
+      setUser({
+        name: user?.user_metadata.name as string,
+        email: user?.email as string
+      })
       setIsAdmin(user?.user_metadata.is_admin)
     })();
   },[])
@@ -110,6 +116,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

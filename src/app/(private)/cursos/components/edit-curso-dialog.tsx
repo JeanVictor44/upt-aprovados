@@ -6,24 +6,24 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import EditCursoForm from "./edit-curso-form";
-import { CreateCurso } from "../types/create-curso";
 import { Domain } from "@/types/domain";
+import { Curso } from "../types/Curso";
   
   interface Props {
     open: boolean;
     tiposCurso: Domain[];
     setOpen: (open: boolean) => void
     revalidate: () => void;
-    selectedCurso: CreateCurso | null;
+    selectedCurso: Curso | null;
   }
-  export default function EditAprovadoDialog({ tiposCurso, open, setOpen, revalidate}: Props) {
+  export default function EditCursoDialog({ tiposCurso, open, setOpen, revalidate, selectedCurso}: Props) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
-            <DialogTitle>Editar Aluno Aprovado</DialogTitle>
+            <DialogTitle>Editar Curso</DialogTitle>
             <DialogDescription>
-              Preencha os campos abaixo para editar um aprovado.
+              Preencha os campos abaixo para editar um curso.
             </DialogDescription>
           </DialogHeader>
           <EditCursoForm 

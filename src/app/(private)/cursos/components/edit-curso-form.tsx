@@ -2,10 +2,9 @@
 
 import { MySelectField } from "@/components/ui/my-select-field";
 import { MyTextField } from "@/components/ui/my-text-field";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateAprovadoSchema } from "../schemas/create-aprovado-schema";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ButtonLoading } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
@@ -13,255 +12,93 @@ import { createInitialState } from "@/types/form-state";
 import { Form } from "@/components/ui/form";
 import { useFormFeedback } from "@/hooks/use-form-feedback";
 import { toast } from "@/hooks/use-toast";
-import { Polo } from "@/types/polo";
-import { EditAprovado } from "../types/edit-aprovado";
 import { Domain } from "@/types/domain";
-import { MyCombobox } from "@/components/ui/my-combobox";
-import { InstituicaoEnsino } from "@/types/instituicao";
-import { useDebouncedCallback } from "use-debounce";
-import { editAprovadoAction } from "../actions/edit-aprovado-action";
-import { Aprovado } from "../types/aprovado";
+import { editCursoAction } from "../actions/edit-curso-action";
 import { CreateCurso } from "../types/create-curso";
 import { CreateCursoSchema } from "../schema/create-curso-schema";
+import { Curso } from "../types/Curso";
+import { EditCurso } from "../types/edit-curso";
 
 interface Props {
   onSave: () => void;
-  polos: Polo[];
-  selectedAprovado: Aprovado | null;
+  tiposCurso: Domain[];
+  selectedCurso: Curso | null;
 }
 
-function isValidValue(value: unknown): value is string {
-  return value !== null && value !== undefined && value !== "" && value !== "null";
-}
-
-export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
+export default function EditCursoForm({ onSave, tiposCurso, selectedCurso}: Props) {
   const [areasConhecimento, setAreasConhecimento] = useState<Domain[]>([]);
 
   const form = useForm<CreateCurso>({
     resolver: zodResolver(CreateCursoSchema),
     defaultValues: {
-      courseId: selectedAprovado?.course.id.toString() || "",
-      institutionId: selectedAprovado?.institution.id.toString() || "",
-      institutionLocation: selectedAprovado?.institution_location || "",
-      name: selectedAprovado?.name || "",
-      phone: selectedAprovado?.phone || "",
-      placing: selectedAprovado?.placing ? selectedAprovado.placing + 'º' : "",
-      extensaoId: selectedAprovado?.extensao?.id.toString() || "",
-      selectionTypeId: selectedAprovado?.selectionType.id.toString() || "",
-      poloId: selectedAprovado?.polo.id.toString() || "",
-      year: selectedAprovado?.year || "",
+      area_conhecimento_id: selectedCurso?.area_conhecimento.id.toString() || "",
+      tipo_curso_id: selectedCurso?.tipo_curso.id.toString() || "",  
+      name: selectedCurso?.name || "",
     }
   });
   
-  const poloId = form.watch("poloId");
-
   function onSuccess() {
     onSave();
     toast({
-      description: "Aprovado editado com sucesso!",
+      description: "Curso editado com sucesso!",
       variant: "success",
     });
     form.reset();
   }
 
-  const [state, editAprovadoFormAction, pending] = useActionState(
-    editAprovadoAction,
-    createInitialState<EditAprovado>()
+  const [state, editCursoFormAction, pending] = useActionState(
+    editCursoAction,
+    createInitialState<EditCurso>()
   );
   const [submitted, setSubmitted] = useState(false);
   useFormFeedback(state, submitted, onSuccess);
 
-  function onSubmit(data: EditAprovado) {
+  function onSubmit(data: EditCurso) {
     setSubmitted(true);
     const formData = new FormData();
 
+    formData.append("area_conhecimento_id", data.area_conhecimento_id.toString());
+    formData.append("tipo_curso_id", data.tipo_curso_id.toString());
     formData.append("name", data.name);
-    if (data.phone) formData.append("phone", data.phone);
-    formData.append("extensaoId", data.extensaoId);
-    formData.append("institutionLocation", data.institutionLocation);
-    formData.append("institutionId", data.institutionId);
-    formData.append("courseId", data.courseId);
-    formData.append("placing", data.placing);
-    formData.append("selectionTypeId", data.selectionTypeId);
-    formData.append("year", data.year);
-    formData.append("poloId", data.poloId);
-    formData.append("id", selectedAprovado?.id.toString() || "");
+    formData.append("id", selectedCurso?.id?.toString() || "");
 
-    startTransition(async () => {
-      editAprovadoFormAction(formData);
-    });
+    editCursoFormAction(formData);
   }
-  const fetchExtensoes = async () => {
-    if (!poloId) return;
 
-    const response = await fetch(`/polos/extensoes?polo_id=${poloId}`);
-    const { data } = await response.json();
-    setExtensoes(data);
-  };
-
-  const fetchTiposSelecao = async () => {
-    const response = await fetch(`/tipos-selecao`);
-    const { data } = await response.json();
-    setTiposSelecao(data);
-  };
-
-  const fetchCursos = async () => {
-    const response = await fetch(`/api/cursos`);
-    const { data } = await response.json();
-    setCursos(data);
-  };
-
-  const fetchInstituicoes = async () => {
-    const response = await fetch(
-      `/api/instituicoes` +
-        (instituicaoQuery ? `?${instituicaoQuery.toString()}` : "")
-    );
-    const { data } = await response.json();
-
-    setInstituicoes(data);
+  const fetchAreasConhecimento = async () => {
+    const areasConhecimento = await fetch("/api/areas-conhecimento").then((res) => res.json());
+    setAreasConhecimento(areasConhecimento.data);
   };
 
   useEffect(() => {
-    fetchInstituicoes();
-  }, [instituicaoQuery]);
-
-  useEffect(() => {
-    form.resetField("extensaoId");
-    fetchExtensoes();
-  }, [poloId]);
-
-  useEffect(() => {
-    if (tiposSelecao.length > 0) return;
-    fetchTiposSelecao();
-  }, []);
-
-  useEffect(() => {
-    if (cursos.length > 0) return;
-    fetchCursos();
+    if (areasConhecimento.length > 0) return;
+    fetchAreasConhecimento();
   }, []);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-4">
-          <div className="w-full flex flex-col gap-4 md:flex-row">
-            <MyTextField
-              control={form.control}
-              name="year"
-              placeholder="Ano"
-              maxLength={4}
-              mask={(value) => value.replace(/\D/g, "")}
-            />
+      <div className="flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-4">
             <MyTextField
               control={form.control}
               name="name"
-              placeholder="Nome"
-              mask={(value) => value.replace(/\d/g, "")}
+              placeholder="Nome do curso"
             />
-            <MyTextField
-              control={form.control}
-              name="phone"
-              placeholder="Telefone"
-              mask={(value) => {
-                let justNumber = value.replace(/\D/g, "");
-
-                if (justNumber.length >= 11)
-                  justNumber = justNumber.slice(0, 11);
-
-                const formatted = justNumber
-                  .replace(/^(\d{2})(\d)/, "($1) $2")
-                  .replace(/(\d{5})(\d)/, "$1-$2");
-
-                return formatted;
-              }}
-            />
-          </div>
-          <MyCombobox
-            control={form.control}
-            label={"Polo"}
-            name="poloId"
-            placeholder="Selecione o polo"
-            options={polos.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
-            modal={true}
-          />
-          <MyCombobox
-            label={"Extensão"}
-            control={form.control}
-            name="extensaoId"
-            placeholder="Selecione a extensão"
-            disabled={!poloId}
-            options={extensoes.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
-            modal={true}
-          />
-          <MyCombobox
-            onInputChange={handleSearch}
-            onSelectValue={(value) => {
-              const institutionSelected = instituicoes.find((i) => i.id == value);
-              const {municipio, uf} = institutionSelected as InstituicaoEnsino;
-
-              if(isValidValue(municipio) && isValidValue(uf)){
-                setDisabled(true);
-                form.setValue("institutionLocation", `${municipio} - ${uf}`);
-                return 
-              }
-
-              form.setValue("institutionLocation",'');
-              setDisabled(false);
-            }}
-            label={"Instuição"}
-            control={form.control}
-            name="institutionId"
-            placeholder="Selecione a instituição"
-            options={instituicoes.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
-            modal={true}
-          />
-          <MyTextField
-            control={form.control}
-            name="institutionLocation"
-            placeholder="Localização da instituição"
-            disabled={disabled}
-          />
-          <MyCombobox
-            control={form.control}
-            name="courseId"
-            label="Curso"
-            placeholder="Selecione o curso"
-            options={cursos.map(({ id, name }) => ({
-              label: name,
-              value: id.toString(),
-            }))}
-            modal={true}
-          />
-          <div className="w-full flex flex-col gap-4 md:flex-row">
-            <MyTextField
-              className="flex-1"
-              control={form.control}
-              name="placing"
-              placeholder="Colocação do aprovado"
-              maxLength={4}
-              mask={(value) => {
-                let newValue = value.replace(/\D/g, "").slice(0, 3);
-                if (newValue.length > 0 && !newValue.endsWith("º")) {
-                  newValue += "º";
-                }
-                return newValue;
-              }}
-            />
-
             <MySelectField
               control={form.control}
-              name="selectionTypeId"
-              placeholder="Selecione o tipo de seleção"
-              options={tiposSelecao.map(({ id, name }) => ({
+              name="tipo_curso_id"
+              placeholder="Selecione o tipo de curso"
+              options={tiposCurso.map(({ id, name }) => ({
+                label: name,
+                value: id.toString(),
+              }))}
+            />
+            <MySelectField
+              control={form.control}
+              name="area_conhecimento_id"
+              placeholder="Selecione a área de conhecimento"
+              options={areasConhecimento.map(({ id, name }) => ({
                 label: name,
                 value: id.toString(),
               }))}

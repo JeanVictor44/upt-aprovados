@@ -2,12 +2,12 @@
 
 import { FormState } from "@/types/form-state"
 import { createClient } from "@/utils/supabase/server";
-import { CreateCurso } from "../types/create-curso";
 import { CreateCursoSchema } from "../schema/create-curso-schema";
+import { EditCurso } from "../types/edit-curso";
 
-type CreateCursoFormState = FormState<CreateCurso> 
+type EditCursoFormState = FormState<EditCurso> 
 
-export async function editCursoAction(prevState: CreateCursoFormState | undefined, formData: FormData) {
+export async function editCursoAction(prevState: EditCursoFormState | undefined, formData: FormData) {
     const validatedFields = CreateCursoSchema.safeParse({
         name: formData.get('name'),
         tipo_curso_id: formData.get('tipo_curso_id'),
@@ -24,12 +24,14 @@ export async function editCursoAction(prevState: CreateCursoFormState | undefine
     const {name, tipo_curso_id, area_conhecimento_id} = validatedFields.data
     const supabase = await createClient()
 
-    const { error } = await supabase.from('curso').insert([
-        { name, tipo_curso_id, area_conhecimento_id }
-    ]).eq('id', formData.get('id'))
+    const { error } = await supabase.from('curso').update({
+        name, 
+        tipo_curso_id, 
+        area_conhecimento_id 
+    }).eq('id', formData.get('id'))
 
     if (error) {
-       console.error('Error creating curso:', error)
+       console.error('Error editing curso:', error)
     }else {
         return {
             errors: {},

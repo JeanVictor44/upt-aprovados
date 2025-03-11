@@ -20,9 +20,9 @@ export default function CreateCursoDialog({ open, setOpen, revalidate, tiposCurs
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
-            <DialogTitle>Cadastrar Aluno Aprovado</DialogTitle>
+            <DialogTitle>Cadastrar Curso</DialogTitle>
             <DialogDescription>
-              Preencha os campos abaixo para cadastrar um novo aprovado.
+              Preencha os campos abaixo para cadastrar um novo curso.
             </DialogDescription>
           </DialogHeader>
           <CreateCursoForm tiposCurso={tiposCurso} onSave={() => {

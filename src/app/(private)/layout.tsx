@@ -17,15 +17,9 @@ export default function PrivateLayout({
   const {replace} = useRouter()
   const supabase = createClient()
   
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    replace('/login')
-  }
-
   useEffect(() => {
     async function redirectIfNotLoggedIn () {
       const { data: {user}} = await supabase.auth.getUser();
-      console.log(user)
       if(!user) {
         replace('/login')
       }

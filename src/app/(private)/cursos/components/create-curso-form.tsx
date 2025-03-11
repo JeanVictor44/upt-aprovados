@@ -2,7 +2,7 @@
 
 import { MySelectField } from "@/components/ui/my-select-field";
 import { MyTextField } from "@/components/ui/my-text-field";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -53,7 +53,9 @@ export default function CreateCursoForm({ onSave, tiposCurso}: Props) {
     formData.append("tipo_curso_id", String(data.tipo_curso_id));
     formData.append("area_conhecimento_id", String(data.area_conhecimento_id));
 
-    createCurso(formData);
+    startTransition(async () => {
+      createCurso(formData);
+    })
   }
 
   const fetchAreasConhecimento = async () => {
