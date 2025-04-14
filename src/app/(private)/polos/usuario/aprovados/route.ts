@@ -1,8 +1,10 @@
 import { createClient } from "@/utils/supabase/server"
 
-export async function GET() {
+export async function GET(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser();
+    const queryParam = new URL(request.url).searchParams.get('query') as string;
+    const edicaoParam = new URL(request.url).searchParams.get('edicao') as string;
 
     if (!user || !user.user_metadata.polo_id) {
         return new Response(JSON.stringify({ data: [] }), {
@@ -81,7 +83,10 @@ export async function GET() {
         selectionType: aprovado.selectionType,
         createdAt: aprovado.createdAt,
         updatedAt: aprovado.updatedAt,
-    }));
+    })).filter(aprovado => {
+        if (!queryParam && !edicaoParam ) return true;
+        return (queryParam ? aprovado?.name?.toLowerCase()?.includes(queryParam?.toLowerCase()) : true) && (edicaoParam ? aprovado?.year == edicaoParam : true)
+    });
 
     return new Response(JSON.stringify({ data: formattedData }), {
         headers: { 'Content-Type': 'application/json' }

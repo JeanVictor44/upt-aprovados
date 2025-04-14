@@ -11,7 +11,7 @@ interface Props {
 export default function SearchAprovado({ fetchAprovados}: Props){
     const [queryParams, setQueryParams] = useState<URLSearchParams>(new URLSearchParams())
     const isFirstRender = useRef(true);
-    const [edicoes] = useState<string[]>([])
+    const [edicoes, setEdicoes] = useState<string[]>([])
 
     const handleSearch = useDebouncedCallback((term: string) => {
         const params = new URLSearchParams(queryParams)
@@ -24,6 +24,15 @@ export default function SearchAprovado({ fetchAprovados}: Props){
         setQueryParams(params)
 
     }, 500);
+
+    useEffect(() => {
+        async function fetchEdicoes() {
+            const response = await fetch("/api/edicoes");
+            const { data } = await response.json();
+            setEdicoes(data)
+        }
+        fetchEdicoes()
+    },[])
 
     useEffect(() => {
         if(isFirstRender.current) {

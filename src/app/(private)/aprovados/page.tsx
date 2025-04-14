@@ -10,6 +10,7 @@ import { Aprovado } from "./types/aprovado";
 import generateStudentsExcel from "@/utils/generate-students-excel";
 import EditAprovadoDialog from "./components/edit-aprovado-dialog";
 import { toast } from "@/hooks/use-toast";
+import SearchAprovado from "./components/search-aprovado";
 
 export default function AprovadosPage() {
   const [isCreateAprovadoDialogOpen, setIsCreateGestorDialogOpen] = useState(false);
@@ -49,6 +50,7 @@ export default function AprovadosPage() {
   const fetchAprovadosByUserPolo = async (params?: URLSearchParams) => {
     const response = await fetch(`/polos/usuario/aprovados`  + (params ? `?${params.toString()}` : ""));
     const { data } = await response.json();
+    console.log(data)
     setAprovados(data);
   };
 
@@ -71,8 +73,7 @@ export default function AprovadosPage() {
         </p>
       </header>
       <section className="flex mb-4 gap-4">
-        {/* <SearchAprovado fetchAprovados={fetchAprovadosByUserPolo} /> */}
-              
+        <SearchAprovado fetchAprovados={fetchAprovadosByUserPolo} />              
         <Button
           className="ml-auto"
           onClick={() => setIsCreateGestorDialogOpen(true)}
