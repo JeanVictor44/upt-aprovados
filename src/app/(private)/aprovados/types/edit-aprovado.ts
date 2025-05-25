@@ -9,4 +9,5 @@ export interface EditAprovado {
     selectionTypeId: string;
     year: string;
     poloId: string;
+    gender: string;
 }

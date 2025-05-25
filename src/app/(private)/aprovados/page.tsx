@@ -50,7 +50,6 @@ export default function AprovadosPage() {
   const fetchAprovadosByUserPolo = async (params?: URLSearchParams) => {
     const response = await fetch(`/polos/usuario/aprovados`  + (params ? `?${params.toString()}` : ""));
     const { data } = await response.json();
-    console.log(data)
     setAprovados(data);
   };
 

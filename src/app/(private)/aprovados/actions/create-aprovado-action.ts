@@ -22,6 +22,7 @@ export async function createAprovadoAction(prevState: CreateAprovadoFormState | 
         selectionTypeId: formData.get('selectionTypeId'),
         year: formData.get('year'),
         poloId: formData.get('poloId'),
+        gender: formData.get('gender'),
     })
     if(!validatedFields.success) {
         return {
@@ -31,8 +32,6 @@ export async function createAprovadoAction(prevState: CreateAprovadoFormState | 
     const data = validatedFields.data
     const supabase = await createClient()
 
-    console.log(data.phone)
-    console.log(data.placing)
 
     const { error } = await supabase.from('aprovado').insert([
         {
@@ -50,6 +49,7 @@ export async function createAprovadoAction(prevState: CreateAprovadoFormState | 
             curso_id: data.courseId,
             tipo_selecao_id: data.selectionTypeId,
             nome_gestor: user?.user_metadata?.name,
+            gender: data.gender,
         }
     ])
 

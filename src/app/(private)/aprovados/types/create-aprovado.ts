@@ -8,5 +8,6 @@ export interface CreateAprovado {
     placing: string;
     selectionTypeId: string;
     year: string;
+    gender: string;
     poloId: string;
 }

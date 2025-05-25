@@ -15,4 +15,5 @@ export interface Aprovado {
     year: string;
     polo:Domain;
     extensao: Domain;
+    gender: string;
 }

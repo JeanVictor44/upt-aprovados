@@ -20,6 +20,7 @@ export async function GET(request: Request) {
         .select(`
             id, 
             name, 
+            gender,
             phone, 
             year, 
             placing,
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
         .select(`
             id, 
             name, 
+            gender,
             phone, 
             year, 
             placing,
@@ -83,6 +85,7 @@ export async function GET(request: Request) {
         selectionType: aprovado.selectionType,
         createdAt: aprovado.createdAt,
         updatedAt: aprovado.updatedAt,
+        gender: aprovado.gender,
     })).filter(aprovado => {
         if (!queryParam && !edicaoParam ) return true;
         return (queryParam ? aprovado?.name?.toLowerCase()?.includes(queryParam?.toLowerCase()) : true) && (edicaoParam ? aprovado?.year == edicaoParam : true)

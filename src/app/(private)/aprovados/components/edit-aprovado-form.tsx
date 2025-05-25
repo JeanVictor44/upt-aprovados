@@ -10,7 +10,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { ButtonLoading } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { createInitialState } from "@/types/form-state";
-import { Form } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useFormFeedback } from "@/hooks/use-form-feedback";
 import { toast } from "@/hooks/use-toast";
 import { Polo } from "@/types/polo";
@@ -22,12 +22,29 @@ import { useDebouncedCallback } from "use-debounce";
 import { editAprovadoAction } from "../actions/edit-aprovado-action";
 import { Aprovado } from "../types/aprovado";
 import { Curso } from "@/types/curso";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Props {
   onSave: () => void;
   polos: Polo[];
   selectedAprovado: Aprovado | null;
 }
+
+
+const genderOptions = {
+  cis: [
+    { label: "Masculino", value: "masculino-cis" },
+    { label: "Feminino", value: "feminino-cis" },
+    { label: "Outros", value: "outros-cis" },
+  ],
+  trans: [
+    { label: "Masculino", value: "masculino-trans" },
+    { label: "Feminino", value: "feminino-trans" },
+    { label: "Binário", value: "binario-trans" },  
+    { label: "Não binário", value: "nao-binario" },
+  ]
+}
+
 
 export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
@@ -77,6 +94,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
       selectionTypeId: selectedAprovado?.selectionType.id.toString() || "",
       poloId: selectedAprovado?.polo.id.toString() || "",
       year: selectedAprovado?.year || "",
+      gender: selectedAprovado?.gender || "",
     }
   });
   
@@ -113,6 +131,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     formData.append("year", data.year);
     formData.append("poloId", data.poloId);
     formData.append("id", selectedAprovado?.id.toString() || "");
+    formData.append("gender", data.gender);
 
     startTransition(async () => {
       editAprovadoFormAction(formData);
@@ -217,6 +236,56 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
               }}
             />
           </div>
+
+
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Identidade de gênero" />
+                      </SelectTrigger>
+                    </FormControl>
+                  <SelectContent >
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b">
+                      Cisgênero
+                    </div>
+                    {
+                      genderOptions.cis.map((option) => (
+                        <SelectItem className="cursor-pointer" key={option.value} value={option.value}>
+                          <span className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Cis</span>
+                            <span>{option.label}</span>
+                          </span>
+                        </SelectItem>
+                      ))
+                    }
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b mt-2">
+                      Transgênero
+                    </div>
+                    {
+                      genderOptions.trans.map((option) => (
+
+                        <SelectItem className="cursor-pointer" key={option.value} value={option.value}>
+                          <span className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Trans</span>
+                            <span>{option.label}</span>
+                          </span>
+                        </SelectItem>
+                      ))
+                    }
+                    <div className="border-t mt-2 pt-2">
+                      <SelectItem value='nao-informado'>Não informado</SelectItem>
+                    </div>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <MyCombobox
             control={form.control}
             label={"Polo"}

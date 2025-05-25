@@ -39,6 +39,11 @@ export const AprovadoSchema = z.object({
     }).trim().min(1, {
         message: 'O curso é obrigatório',
     }),
+    gender: z.string({
+        message: 'O gênero é obrigatório',
+    }).trim().min(1, {
+        message: 'O gênero é obrigatório',
+    }),
     placing: z.string().nullable().optional().transform((value) => {
         if (Boolean(value)) {
             return value?.split('º')[0];
