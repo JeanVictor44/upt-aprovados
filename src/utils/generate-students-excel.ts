@@ -9,6 +9,18 @@ import { redirect } from 'next/navigation'
 import {styleRowData} from './style-row-data'
 import { Domain } from '@/types/domain'
 
+
+const genderOptions = {
+    "masculino-cis": "Cisgênero Masculino" ,
+    "feminino-cis": "Cisgênero Feminino",
+    "outros-cis": "Cisgênero Outros",
+    "masculino-trans": "Transgênero Masculino",
+    "feminino-trans": "Transgênero Feminino",
+    "binario-trans": "Binário",
+    "nao-binario": "Não Binário",
+    "nao-informado": "Não Informado",
+}
+
 interface AprovadoQuery  {
     id: number;
     name: string;
@@ -43,13 +55,14 @@ interface AprovadoQuery  {
         name: string;
     },
     nome_gestor: string;
+    gender: string | null;
 }
 const generateStudentsExcel = async() => {
     const workbook = new Excel.Workbook()
     try {
         const workSheet = workbook.addWorksheet('Lista de aprovações', {views: [{showGridLines:false}]})
         createHeaderExcel(workSheet, workbook)
-        createRowTitle(workSheet, ['N°', 'ALUNO', 'TELEFONE DE CONTATO', 'CURSO DE APROVAÇÃO', 'MODALIDADE DA GRADUAÇÃO', 'UNIVERSIDADE/FACULDADE', 'LOCAL/MUNICÍPIO DA \n UNIVERSIDADE/FACULDADE', 'TIPO DE SELEÇÃO', 'COLOCAÇÃO NO VESTIBULAR/PROCESSO SELETIVO', `MUNICÍPIO/EXTENSÃO DA TURMA UPT ${new Date().getFullYear()}`, 'POLO','ANO DE EDIÇÃO DO UPT', 'GESTOR'], /[a-m]/gi, STUDENT_COLUMNS)
+        createRowTitle(workSheet, ['N°', 'ALUNO', 'IDENTIDADE DE GÊNERO', 'TELEFONE DE CONTATO', 'CURSO DE APROVAÇÃO', 'MODALIDADE DA GRADUAÇÃO', 'UNIVERSIDADE/FACULDADE', 'LOCAL/MUNICÍPIO DA \n UNIVERSIDADE/FACULDADE', 'TIPO DE SELEÇÃO', 'COLOCAÇÃO NO VESTIBULAR/PROCESSO SELETIVO', `MUNICÍPIO/EXTENSÃO DA TURMA UPT ${new Date().getFullYear()}`, 'POLO','ANO DE EDIÇÃO DO UPT', 'GESTOR'], /[a-o]/gi, STUDENT_COLUMNS)
         
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser();
@@ -81,7 +94,8 @@ const generateStudentsExcel = async() => {
                 extensao:extensao_id(id, name), 
                 course:curso_id(id, name, tipo_curso_id), 
                 selectionType:tipo_selecao_id(id, name),
-                nome_gestor
+                nome_gestor,
+                gender
             `);
 
             if(!data || data.length === 0) {
@@ -117,7 +131,8 @@ const generateStudentsExcel = async() => {
                 extensao:extensao_id(id, name), 
                 course:curso_id(id, name, tipo_curso_id), 
                 selectionType:tipo_selecao_id(id, name),
-                nome_gestor
+                nome_gestor,
+                gender
             `)
             .eq('polo_id', user.user_metadata.polo_id);
 
@@ -153,7 +168,8 @@ const generateStudentsExcel = async() => {
                 polo: (singleData?.polo as unknown as Domain)?.name,
                 editionYear: singleData?.year,
                 nome_gestor: singleData?.nome_gestor,
-                tipo_curso: singleData?.course?.tipo_curso
+                tipo_curso: singleData?.course?.tipo_curso,
+                gender:singleData?.gender ? genderOptions[singleData?.gender as keyof typeof genderOptions] : 'Não consta'
             }
             workSheet.addRow(newSingleData)
         })

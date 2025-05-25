@@ -3,7 +3,7 @@ import Excel from 'exceljs'
 export const styleRowData = (workSheet: Excel.Worksheet) => {
     //Uppercase all data
     workSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-        const HEADER_ROW = 10
+        const HEADER_ROW = 11
         if(rowNumber > HEADER_ROW){
             row.eachCell(cell => {                    
                 workSheet.getCell(cell.address).alignment = {horizontal: "left"}
@@ -13,7 +13,7 @@ export const styleRowData = (workSheet: Excel.Worksheet) => {
 
                 }
                 
-                if(cell.address.includes('N')){
+                if(cell.address.includes('O')){
                     return 
                 }else {
                     cell.border = {

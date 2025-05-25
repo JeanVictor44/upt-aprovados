@@ -1,6 +1,7 @@
 export const STUDENT_COLUMNS = [
     { key:'number',width:5},
     {key:'name', width: 35},
+    {key:'gender', width: 35},
     {key: 'phone', width:35},
     {key: 'course', width:35},
     {key: 'tipo_curso', width:35},
