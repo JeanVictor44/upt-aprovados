@@ -9,13 +9,12 @@ export async function GET (request: Request) {
         page: 1,
         perPage: 1000,
     });
-
     if (usersError) {
         console.error("Error fetching users:", usersError);
         return;
     }
 
-    const users = usersData.users.filter(user => user.user_metadata.polo_id).filter((usuario) => {
+    const users = usersData.users.filter(user => user.user_metadata.data.polo_id ).filter((usuario) => {
         if (!queryParam && !poloId) return true;
         if(queryParam && !poloId) {
             return usuario.user_metadata.name.toLowerCase().includes(queryParam?.toLowerCase()) || 

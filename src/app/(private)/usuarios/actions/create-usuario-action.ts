@@ -23,21 +23,21 @@ export async function createUsuarioAction(prevState: CreateGestorFormState | und
     }
     
     const {email,name,password,poloId, isAdmin} = validatedFields.data
+
     const supabase = await createClient()
 
-    const { error } = await supabase.auth.signUp({
+     const { error } = await supabase.auth.admin.createUser({
         email,
         password,
-        options: {
-            data: {
-                name,
-                polo_id: Number(poloId),
-                is_active: true,
-                is_admin: isAdmin,
-            }
+        user_metadata: {
+            name,
+            polo_id: Number(poloId),
+            is_active: true,
+            is_admin: isAdmin,
         }
     })
-
+    
+    
     if (error) {
         if(error.code === 'user_already_exists') {
             return {

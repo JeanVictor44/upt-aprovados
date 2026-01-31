@@ -23,21 +23,26 @@ export default function UsuariosPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    (async() => {
-      const {data: {user}} = await supabase.auth.getUser()
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user?.user_metadata.is_admin) {
         toast({
-          description: "Você não tem permissão para acessar a página de usuários!",
+          description:
+            "Você não tem permissão para acessar a página de usuários!",
           variant: "destructive",
-        })
-        redirect('/aprovados')
+        });
+        redirect("/aprovados");
       }
-    })()
-  },[])
+    })();
+  }, []);
 
   async function fetchUsuarios(params?: URLSearchParams) {
-    const usuarios = await fetch("/usuarios/api" + (params ? `?${params.toString()}` : ""))
-    const {data} = await usuarios.json()
+    const usuarios = await fetch(
+      "/usuarios/api" + (params ? `?${params.toString()}` : ""),
+    );
+    const { data } = await usuarios.json();
     setUsuarios(data);
   }
   async function fetchPolosData() {
@@ -47,21 +52,21 @@ export default function UsuariosPage() {
 
   function deleteUsuario(id: string) {
     fetch(`/usuarios/api/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     }).then((res) => {
-      if (res.status === 200) {  
+      if (res.status === 200) {
         toast({
           description: "Usuário deletado com sucesso!",
           variant: "success",
         });
         fetchUsuarios();
-      }else {
+      } else {
         toast({
           description: "Erro ao deletar usuário!",
           variant: "destructive",
         });
       }
-    })
+    });
   }
 
   function handleSelectUsuario(usuario: Usuario) {
@@ -92,28 +97,28 @@ export default function UsuariosPage() {
         </Button>
       </section>
       <section>
-        <DataTable 
+        <DataTable
           columns={gestoresColumns({
             deleteUsuario,
-            onEdit: handleSelectUsuario,     
-          })} 
-          data={usuarios} 
+            onEdit: handleSelectUsuario,
+          })}
+          data={usuarios}
         />
       </section>
-        
+
       <CreateUsuarioDialog
-          polos={polos}
-          open={isCreateUsuarioDialog}
-          setOpen={setIsCreateUsuarioDialog}
-          revalidate={fetchUsuarios}
-        />
-        <EditUsuarioDialog
-          polos={polos}
-          open={isEditUsuarioDialog}
-          setOpen={setIsEditUsuarioDialog}
-          revalidate={fetchUsuarios}
-          selectedUsuario={selectedUsuario}
-        />
+        polos={polos}
+        open={isCreateUsuarioDialog}
+        setOpen={setIsCreateUsuarioDialog}
+        revalidate={fetchUsuarios}
+      />
+      <EditUsuarioDialog
+        polos={polos}
+        open={isEditUsuarioDialog}
+        setOpen={setIsEditUsuarioDialog}
+        revalidate={fetchUsuarios}
+        selectedUsuario={selectedUsuario}
+      />
     </div>
   );
 }
