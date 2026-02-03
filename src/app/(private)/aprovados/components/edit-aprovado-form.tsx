@@ -10,7 +10,13 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { ButtonLoading } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { createInitialState } from "@/types/form-state";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { useFormFeedback } from "@/hooks/use-form-feedback";
 import { toast } from "@/hooks/use-toast";
 import { Polo } from "@/types/polo";
@@ -22,14 +28,19 @@ import { useDebouncedCallback } from "use-debounce";
 import { editAprovadoAction } from "../actions/edit-aprovado-action";
 import { Aprovado } from "../types/aprovado";
 import { Curso } from "@/types/curso";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   onSave: () => void;
   polos: Polo[];
   selectedAprovado: Aprovado | null;
 }
-
 
 const genderOptions = {
   cis: [
@@ -40,23 +51,28 @@ const genderOptions = {
   trans: [
     { label: "Masculino", value: "masculino-trans" },
     { label: "Feminino", value: "feminino-trans" },
-    { label: "Binário", value: "binario-trans" },  
+    { label: "Binário", value: "binario-trans" },
     { label: "Não binário", value: "nao-binario" },
-  ]
-}
+  ],
+};
 
-
-export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Props) {
+export default function EditAprovadoForm({
+  onSave,
+  polos,
+  selectedAprovado,
+}: Props) {
   const [extensoes, setExtensoes] = useState<Domain[]>([]);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [tiposSelecao, setTiposSelecao] = useState<Domain[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoEnsino[]>([]);
   const [instituicaoQuery, setInstituicaoQuery] = useState(
-    new URLSearchParams('?query=' + selectedAprovado?.institution.name)
+    new URLSearchParams("?query=" + selectedAprovado?.institution.name),
   );
-  const [municipios, setMunicipios] = useState<{id: number, name: string}[]>([]);
+  const [municipios, setMunicipios] = useState<{ id: number; name: string }[]>(
+    [],
+  );
   const [municipioQuery, setMunicipioQuery] = useState(
-    new URLSearchParams('?query=' + selectedAprovado?.institution_location)
+    new URLSearchParams("?query=" + selectedAprovado?.institution_location),
   );
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(instituicaoQuery);
@@ -69,7 +85,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     setInstituicaoQuery(params);
   }, 500);
 
-  const handleSearchMunicipio = useDebouncedCallback(async(term: string) => {
+  const handleSearchMunicipio = useDebouncedCallback(async (term: string) => {
     const params = new URLSearchParams(municipioQuery);
 
     if (term) {
@@ -80,7 +96,6 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     setMunicipioQuery(params);
   }, 500);
 
-
   const form = useForm<EditAprovado>({
     resolver: zodResolver(CreateAprovadoSchema),
     defaultValues: {
@@ -89,15 +104,15 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
       institutionLocation: selectedAprovado?.institution_location || "",
       name: selectedAprovado?.name || "",
       phone: selectedAprovado?.phone || "",
-      placing: selectedAprovado?.placing ? selectedAprovado.placing + 'º' : "",
+      placing: selectedAprovado?.placing ? selectedAprovado.placing + "º" : "",
       extensaoId: selectedAprovado?.extensao?.id.toString() || "",
       selectionTypeId: selectedAprovado?.selectionType.id.toString() || "",
       poloId: selectedAprovado?.polo.id.toString() || "",
       year: selectedAprovado?.year || "",
       gender: selectedAprovado?.gender || "",
-    }
+    },
   });
-  
+
   const poloId = form.watch("poloId");
 
   function onSuccess() {
@@ -111,7 +126,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
 
   const [state, editAprovadoFormAction, pending] = useActionState(
     editAprovadoAction,
-    createInitialState<EditAprovado>()
+    createInitialState<EditAprovado>(),
   );
   const [submitted, setSubmitted] = useState(false);
   useFormFeedback(state, submitted, onSuccess);
@@ -126,7 +141,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
     formData.append("institutionLocation", data.institutionLocation);
     formData.append("institutionId", data.institutionId);
     formData.append("courseId", data.courseId);
-    if(data.placing) formData.append("placing", data.placing);
+    if (data.placing) formData.append("placing", data.placing);
     formData.append("selectionTypeId", data.selectionTypeId);
     formData.append("year", data.year);
     formData.append("poloId", data.poloId);
@@ -160,17 +175,17 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
   const fetchInstituicoes = async () => {
     const response = await fetch(
       `/api/instituicoes` +
-        (instituicaoQuery ? `?${instituicaoQuery.toString()}` : "")
+        (instituicaoQuery ? `?${instituicaoQuery.toString()}` : ""),
     );
     const { data } = await response.json();
 
-    setInstituicoes(data);
+    setInstituicoes(data || []);
   };
 
   const fetchMunicpios = async () => {
     const response = await fetch(
       `/api/municipios` +
-        (municipioQuery ? `?${municipioQuery.toString()}` : "")
+        (municipioQuery ? `?${municipioQuery.toString()}` : ""),
     );
     const { data } = await response.json();
 
@@ -184,7 +199,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
   useEffect(() => {
     fetchMunicpios();
   }, [municipioQuery]);
-  
+
   useEffect(() => {
     form.resetField("extensaoId");
     fetchExtensoes();
@@ -237,48 +252,59 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             />
           </div>
 
-
           <FormField
             control={form.control}
             name="gender"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Identidade de gênero" />
-                      </SelectTrigger>
-                    </FormControl>
-                  <SelectContent >
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Identidade de gênero" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b">
                       Cisgênero
                     </div>
-                    {
-                      genderOptions.cis.map((option) => (
-                        <SelectItem className="cursor-pointer" key={option.value} value={option.value}>
-                          <span className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">Cis</span>
-                            <span>{option.label}</span>
+                    {genderOptions.cis.map((option) => (
+                      <SelectItem
+                        className="cursor-pointer"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            Cis
                           </span>
-                        </SelectItem>
-                      ))
-                    }
+                          <span>{option.label}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b mt-2">
                       Transgênero
                     </div>
-                    {
-                      genderOptions.trans.map((option) => (
-
-                        <SelectItem className="cursor-pointer" key={option.value} value={option.value}>
-                          <span className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">Trans</span>
-                            <span>{option.label}</span>
+                    {genderOptions.trans.map((option) => (
+                      <SelectItem
+                        className="cursor-pointer"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            Trans
                           </span>
-                        </SelectItem>
-                      ))
-                    }
+                          <span>{option.label}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
                     <div className="border-t mt-2 pt-2">
-                      <SelectItem value='nao-informado'>Não informado</SelectItem>
+                      <SelectItem value="nao-informado">
+                        Não informado
+                      </SelectItem>
                     </div>
                   </SelectContent>
                 </Select>
@@ -322,7 +348,7 @@ export default function EditAprovadoForm({ onSave, polos, selectedAprovado}: Pro
             }))}
             modal={true}
           />
-            <MyCombobox
+          <MyCombobox
             onInputChange={handleSearchMunicipio}
             label={"Local da instituição"}
             control={form.control}

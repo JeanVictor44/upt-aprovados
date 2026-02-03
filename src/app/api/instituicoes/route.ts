@@ -9,14 +9,25 @@ export async function GET(request: Request) {
     let instituicoes: InstituicaoEnsino[] = []
 
     if(query){
-        const { data } = await supabase
-            .from('instituicao')
-            .select('*')
-            .or(`name.ilike.%${query}%,sigla.ilike.%${query}%`)
-            .order('name', { ascending: true })
-            .limit(10)
+      const { data } = await supabase
+        .from('instituicao')
+        .select('*')
+        .ilike('name', `%${query}%`)
+        .order('name', { ascending: true })
+        .limit(10)
 
-        instituicoes = data as InstituicaoEnsino[]
+      const { data: data2 } = await supabase
+        .from('instituicao')
+        .select('*')
+        .ilike('sigla', `%${query}%`)
+        .order('name', { ascending: true })
+        .limit(10)
+
+        const setInstituicoes = new Set([
+            ...(data || []),
+            ...(data2 || []),
+        ])
+        instituicoes = [...setInstituicoes] as InstituicaoEnsino[]
     }else {
         const { data } = await supabase
             .from('instituicao')

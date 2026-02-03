@@ -89,7 +89,7 @@ export async function GET(request: Request) {
     })).filter(aprovado => {
         if (!queryParam && !edicaoParam ) return true;
         return (queryParam ? aprovado?.name?.toLowerCase()?.includes(queryParam?.toLowerCase()) : true) && (edicaoParam ? aprovado?.year == edicaoParam : true)
-    });
+    }).sort((a, b) => b.year - a.year);;
 
     return new Response(JSON.stringify({ data: formattedData }), {
         headers: { 'Content-Type': 'application/json' }
