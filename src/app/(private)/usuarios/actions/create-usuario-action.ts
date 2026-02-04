@@ -29,6 +29,7 @@ export async function createUsuarioAction(prevState: CreateGestorFormState | und
      const { error } = await supabase.auth.admin.createUser({
         email,
         password,
+        email_confirm: true,
         user_metadata: {
             name,
             polo_id: Number(poloId),
